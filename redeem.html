@@ -24,7 +24,7 @@
         <input id="code" class="code-input" placeholder="XXXX-XXXX" autocomplete="off">
         <button id="redeemBtn" class="btn btn-primary btn-full" style="margin-top:12px">验证兑换码</button>
         <div id="alert" class="alert"></div>
-        <div class="hint">前端演示码：<code>DEMO-2026</code></div>
+        <div class="hint">朋友测试码已启用。每个测试码建议只发给 1 位朋友使用。</div>
       </section>
     </div>
   </main>
@@ -37,12 +37,21 @@
       alertBox.textContent = text;
       alertBox.className = `alert show ${type}`;
     }
+    const TEST_CODES = ['JS26-4AAT2X', 'JS26-R3G52N', 'JS26-UL5BCG', 'JS26-5TSWFA', 'JS26-X28NS8', 'JS26-KQ4P38', 'JS26-DTE3TX', 'JS26-FMAN4M', 'JS26-LHYAKS', 'JS26-9QMZF8', 'JS26-TDRM23', 'JS26-H9X96H', 'JS26-DC6EFR', 'JS26-QWCD29', 'JS26-BBJQS8', 'JS26-4X9HRE', 'JS26-XGSTTN', 'JS26-Q846BV', 'JS26-8SDD2R', 'JS26-SFFKVL'];
     function redeem() {
       const code = input.value.trim().toUpperCase();
-      if (code !== 'DEMO-2026') {
-        showAlert('兑换码无效。前端预览请使用 DEMO-2026。', 'error');
+      if (!TEST_CODES.includes(code)) {
+        showAlert('兑换码无效，请检查是否输入正确。', 'error');
         return;
       }
+
+      const previousCode = localStorage.getItem('competition_quiz_code');
+      if (previousCode !== code) {
+        localStorage.removeItem('competition_quiz_index');
+        localStorage.removeItem('competition_quiz_answers');
+        localStorage.removeItem('competition_quiz_completed');
+      }
+
       localStorage.setItem('competition_quiz_code', code);
       showAlert('验证成功，正在进入测试。', 'success');
       setTimeout(() => location.href = 'quiz.html', 350);

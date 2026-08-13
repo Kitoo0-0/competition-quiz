@@ -3,7 +3,7 @@
   const scaleLabels = ['非常不符合','比较不符合','一般','比较符合','非常符合'];
   const dimLabels = {E:'底层能力 · 情绪洞察',A:'底层能力 · 外貌呈现',S:'底层能力 · 社交资本',W:'底层能力 · 工作执行',C:'底层能力 · 竞争野心',R:'底层能力 · 战略认知',L:'底层能力 · 资源杠杆',K69:'最终校准',K70:'最终校准',K71:'最终校准',K72:'最终校准'};
 
-  if (localStorage.getItem('competition_quiz_code') !== 'DEMO-2026') {
+  if (!localStorage.getItem('competition_quiz_code')) {
     location.href = 'redeem.html';
     return;
   }
