@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>正在测试｜竞势</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="quiz-header">
+    <div class="narrow quiz-header-inner">
+      <a class="text-link" href="index.html">退出</a>
+      <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+      <div id="progressCount" class="progress-count">01 / 72</div>
+    </div>
+  </header>
+
+  <main class="narrow quiz-main">
+    <div id="questionBox">
+      <div id="questionMeta" class="question-meta"></div>
+      <h1 id="questionTitle" class="question-title"></h1>
+      <div id="answers" class="answers"></div>
+      <div class="quiz-nav">
+        <button id="prevBtn">← 上一题</button>
+        <button id="saveBtn">保存并退出</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/questions.js"></script>
+  <script src="js/quiz.js"></script>
+</body>
+</html>

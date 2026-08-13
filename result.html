@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>测试结果｜竞势</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">势</span>竞势</a>
+      <div class="header-actions"><button id="shareBtn" class="btn btn-primary">生成分享卡</button></div>
+    </div>
+  </header>
+
+  <main class="container result-wrap">
+    <section class="result-hero reveal">
+      <div>
+        <div class="eyebrow">Your primary archetype</div>
+        <h1 id="primaryName" class="result-title">资源整合型</h1>
+        <p id="primaryTagline" class="result-tagline"></p>
+        <div class="badges">
+          <span id="trackBadge" class="badge"></span>
+          <span id="keywordBadge" class="badge"></span>
+          <span id="secondaryBadge" class="badge"></span>
+        </div>
+      </div>
+      <div class="score-grid">
+        <div class="score-card"><span>雄竞指数</span><strong id="mScore">0</strong><small>通过能力、结果、位置与资产直接获得资源的倾向</small></div>
+        <div class="score-card"><span>雌竞指数</span><strong id="fScore">0</strong><small>通过吸引、关系、环境与综合价值获得优先选择的倾向</small></div>
+      </div>
+    </section>
+
+    <section class="report-card personality-profile reveal">
+      <div class="section-kicker">01 · 主人格解读</div>
+      <div class="profile-grid">
+        <div>
+          <h2 id="profileTitle">你的人格核心</h2>
+          <p id="profileCore" class="lead-copy"></p>
+        </div>
+        <dl class="definition-list">
+          <div><dt>最自然的赢法</dt><dd id="profileWin"></dd></div>
+          <div><dt>真正看重的筹码</dt><dd id="profileStake"></dd></div>
+          <div><dt>与相近类型的区别</dt><dd id="profileBoundary"></dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="report-card reveal">
+      <div class="section-kicker">02 · 第二人格</div>
+      <div class="secondary-layout">
+        <div><h2 id="secondaryName" class="sub-result-title"></h2><p id="secondaryTagline" class="lead-copy"></p></div>
+        <div><h3>它如何补充主人格</h3><p id="secondaryText"></p></div>
+      </div>
+    </section>
+
+    <section class="report-card radar-layout reveal">
+      <div>
+        <div class="section-kicker">03 · 七维底层能力</div>
+        <svg id="radar" viewBox="0 0 320 320" aria-label="七维能力雷达图"></svg>
+      </div>
+      <div>
+        <h2>你的能力不是高低排序，而是一套可配置的资源。</h2>
+        <p class="section-intro">七个维度分别回答你在“读人、呈现、关系、做事、争取、判断、借力”上的稳定倾向。分数越高，不代表越优秀，而代表你更容易依赖这项能力解决问题。</p>
+        <div id="dimensionList" class="dimension-list detailed"></div>
+      </div>
+    </section>
+
+    <section class="report-card reveal">
+      <div class="section-kicker">04 · 五项竞争方式</div>
+      <h2>你通常通过哪几种方式获得资源与机会？</h2>
+      <p class="section-intro">这五项不是另一套人格，而是把你的竞争动作拆开来看：你会不会正面争、是否容易被优先选择、离开环境后能否独立产出、是否擅长借力，以及你到底有多想往上走。</p>
+      <div id="indexGrid" class="strategy-grid"></div>
+    </section>
+
+    <section class="report-card long-report reveal">
+      <div class="section-kicker">05 · 核心优势分析</div>
+      <h2>你的优势真正值钱的地方，不在分数本身，而在组合方式。</h2>
+      <div id="strengthAnalysis" class="long-copy"></div>
+    </section>
+
+    <section class="report-card long-report reveal">
+      <div class="section-kicker">06 · 致命短板分析</div>
+      <h2>真正需要警惕的，不是低分，而是优势用过头之后形成的盲区。</h2>
+      <div id="weaknessAnalysis" class="long-copy"></div>
+    </section>
+
+    <section class="report-card reveal">
+      <div class="section-kicker">07 · 职业与发展地图</div>
+      <h2>哪些环境更容易奖励你的能力结构？</h2>
+      <div id="careerMap" class="career-map"></div>
+      <p class="report-note">职业建议只作为能力结构参考，不替代兴趣、经验、收入需求、行业门槛与现实机会。</p>
+    </section>
+
+    <section class="report-card reveal">
+      <div class="section-kicker">08 · 最值得积累的5项资产</div>
+      <h2>不是继续把自己变得“更全面”，而是把优势沉淀成能带走的东西。</h2>
+      <div id="assetList" class="asset-list"></div>
+    </section>
+
+    <section id="shareCard" class="share-card reveal">
+      <h3>分享卡预览</h3>
+      <div class="share-preview">
+        <div><div class="eyebrow">竞势 · personal strategy</div><div style="margin-top:70px;color:var(--muted);font-size:13px">我的竞争人格</div><div id="shareType" class="share-type"></div><p id="shareLine" style="color:var(--muted);line-height:1.8"></p></div>
+        <div id="shareScores" style="font-size:12px;color:var(--muted)"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/questions.js"></script>
+  <script src="js/result.js"></script>
+</body>
+</html>
