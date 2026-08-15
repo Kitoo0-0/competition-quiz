@@ -303,8 +303,13 @@
   renderRadar();
 
   document.getElementById('shareType').textContent=p.name;
+  document.getElementById('shareTrack').textContent=`${p.track}策略 · ${primary}`;
   document.getElementById('shareLine').textContent=p.tagline;
-  document.getElementById('shareScores').textContent=`雄竞 ${M} · 雌竞 ${F} · 72题 / 16型`;
+  document.getElementById('shareMScore').textContent=M;
+  document.getElementById('shareFScore').textContent=F;
+  document.getElementById('shareMBar').style.width=`${M}%`;
+  document.getElementById('shareFBar').style.width=`${F}%`;
+  document.getElementById('shareStrengths').innerHTML=top.slice(0,3).map(([key,value])=>`<span>${DIM_NAMES[key]} ${value}</span>`).join('');
   document.getElementById('shareBtn').addEventListener('click',()=>{const card=document.getElementById('shareCard');card.classList.add('show');setTimeout(()=>card.classList.add('on'),20);card.scrollIntoView({behavior:'smooth',block:'center'});});
 
   const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('on');}),{threshold:.06});
