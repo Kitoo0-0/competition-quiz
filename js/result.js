@@ -113,13 +113,19 @@
   let answers = {};
   try { answers = JSON.parse(localStorage.getItem('competition_quiz_answers') || '{}'); } catch (_) {}
   if (Object.keys(answers).length < 72) {
+    // 直接打开结果页时使用一组只用于UI预览的示例答案。
     answers = {};
     Q.forEach(q => {
-      if (q.type === 'binary') answers[q.id] = [58,60,63,66,68].includes(q.id) ? 'B' : (q.id % 3 === 0 ? 'A' : 'B');
-      else answers[q.id] = ((q.id * 7) % 5) + 1;
+      if (q.type === 'binary') {
+        const m=q.mOption || 'A', f=m==='A'?'B':'A';
+        answers[q.id] = [57,60,64,68].includes(q.id) ? m : f;
+      } else if (q.id <= 56) {
+        const scored=['E','S','R','L'].includes(q.dimension) ? 5 : 3;
+        answers[q.id] = q.reverse ? 6-scored : scored;
+      } else {
+        answers[q.id] = 4;
+      }
     });
-    [1,2,3,4,5,7,8,17,18,19,20,21,23,24,41,42,43,44,45,47,48,49,50,51,52,53,55,56,69,71,72].forEach(id => answers[id] = 5);
-    [6,22,46,54].forEach(id => answers[id] = 1);
   }
 
   function round(v){ return Math.max(0, Math.min(100, Math.round(v))); }
@@ -131,8 +137,12 @@
   const d={}; ['E','A','S','W','C','R','L'].forEach(k=>d[k]=dimScore(k));
   const binary=Q.filter(q=>q.type==='binary');
   const totalWeight=binary.reduce((s,q)=>s+q.weight,0);
-  const aWeight=binary.reduce((s,q)=>s+((answers[q.id]||'A')==='A'?q.weight:0),0);
-  const MChoice=aWeight/totalWeight*100, FChoice=100-MChoice;
+  const mWeight=binary.reduce((sum,q)=>{
+    const selected=answers[q.id] || q.mOption || 'A';
+    const mOption=q.mOption || 'A';
+    return sum + (selected===mOption ? q.weight : 0);
+  },0);
+  const MChoice=mWeight/totalWeight*100, FChoice=100-MChoice;
   const MCapacity=d.W*.27+d.C*.24+d.R*.22+d.L*.17+d.S*.10;
   const FCapacity=d.E*.24+d.A*.24+d.S*.22+d.L*.18+d.R*.12;
   const M=round(MCapacity*.55+MChoice*.45), F=round(FCapacity*.55+FChoice*.45);
@@ -179,31 +189,43 @@
   function indexBand(v){ if(v>=80)return '很强'; if(v>=60)return '较强'; if(v>=40)return '中等'; return '较弱'; }
   function strongestIndex(){ return Object.entries(indexes).sort((a,b)=>b[1]-a[1])[0]; }
   function weakestIndex(){ return Object.entries(indexes).sort((a,b)=>a[1]-b[1])[0]; }
+  function firstSentences(text,count=1){
+    const parts=String(text||'').match(/[^。！？]+[。！？]?/g) || [String(text||'')];
+    return parts.slice(0,count).join('').trim();
+  }
 
   function strengthAnalysis(){
     const [t1,t2,t3]=top.slice(0,3); const si=strongestIndex();
-    const trackText=M>F
-      ? `你的雄竞指数为 ${M}，高于雌竞指数 ${F}。这意味着你最终仍然更相信“先拥有筹码，再获得资源”：能力、结果、收入、位置或所有权会给你更强的安全感。但你的报告并不是纯粹的硬碰硬，因为你的${DIM_NAMES[t1[0]]}与${DIM_NAMES[t2[0]]}同样突出，这让你可以用更聪明的方式竞争。`
-      : `你的雌竞指数为 ${F}，高于雄竞指数 ${M}。这意味着你很重视“价值如何被感知、被选择和被资源放大”，并不认为所有东西都必须靠正面击败别人才能获得。值得注意的是，这不代表依赖别人；你的能力结构里仍然存在可以独立沉淀的部分，因此真正适合你的策略是把吸引和关系转化为长期资产。`;
+    const track=M>F?'雄竞':'雌竞';
+    const useMap={
+      E:'把读人能力用在沟通、谈判和筛选关系上',
+      A:'把呈现能力用在关键场合与长期个人形象上',
+      S:'把关系能力沉淀成稳定的推荐与合作网络',
+      W:'把执行力沉淀成作品、流程和可靠信用',
+      C:'把竞争欲集中到真正能改变收入、位置或选择权的目标上',
+      R:'把判断力沉淀成自己的决策框架',
+      L:'把借力意识沉淀成渠道、平台和长期合作结构'
+    };
     return [
-      `你的主人格是<strong>${p.name}</strong>。这个结果真正有价值的地方，不是给你一个新的身份标签，而是解释你为什么在某些环境里会明显比别人顺手。${p.core} 从资源配置角度看，你最值得做的不是把所有维度都补到80分，而是先承认自己已经有一套天然更高效的“赢法”，然后把时间和机会向这套能力集中。`,
-      `第一项核心优势是<strong>${DIM_NAMES[t1[0]]} ${t1[1]}分</strong>。${DIMENSIONS[t1[0]].meaning}${DIMENSIONS[t1[0]].high} 对你来说，这项能力不应该只停留在“性格特点”，而应该被转成现实筹码。例如，${t1[0]==='S'?'把认识人升级为稳定的行业网络和推荐关系':t1[0]==='R'?'把看懂问题升级为可复用的决策框架、行业判断或公开观点':t1[0]==='E'?'把会读人升级为谈判、管理、客户关系和筛选能力':t1[0]==='W'?'把能做事升级为可复制流程、作品和可靠信用':t1[0]==='A'?'把会呈现升级为明确的专业形象和长期品牌识别':t1[0]==='C'?'把上升动力集中到少数真正值得争取的目标': '把借力意识沉淀为渠道、平台、合作机制和自有资产'}。`,
-      `第二项和第三项优势分别是<strong>${DIM_NAMES[t2[0]]} ${t2[1]}分</strong>与<strong>${DIM_NAMES[t3[0]]} ${t3[1]}分</strong>。真正产生稀缺性的通常不是单项100分，而是两个或三个能力同时出现。例如你现在的组合意味着：${DIMENSIONS[t2[0]].short}能力负责打开机会，${DIMENSIONS[t3[0]].short}能力负责提高判断或转化效率，而主人格则决定这些能力最终应该流向什么结果。这种组合比单纯“很会社交”“很能工作”更有价值，因为它允许你在复杂场景里切换角色。`,
-      trackText,
-      `五项竞争方式里，你目前最强的是<strong>${INDEXES[si[0]].name} ${si[1]}分</strong>。${INDEXES[si[0]].meaning} 对你的策略含义是：不要把这项能力只用来解决眼前问题，而要让它产生复利。如果你最强的是借力放大，就去建立长期渠道和合作结构；如果最强的是被选择力，就把注意力转成客户、信用和筛选权；如果最强的是正面争取，就把竞争集中到真正能改变收入、位置或所有权的节点；如果最强的是独立产出，就建立可迁移的专业和现金流；如果最强的是向上驱动，就尽量把野心放进高回报赛道，而不是陷入无意义比较。`,
-      `你的第二人格是<strong>${s.name}</strong>。第二人格不是“另一个你”，而是当环境变化时可以调用的第二套策略。${s.tagline} 对你而言，最理想的状态不是在${p.name}和${s.name}之间二选一，而是让主人格负责决定主要资源来源，让第二人格弥补主人格最容易忽视的一部分。真正成熟的竞争策略通常不是把自己修成一个平均的人，而是让一个明确主引擎配上一套可靠辅助系统。`
+      `你的优势核心是<strong>${DIM_NAMES[t1[0]]} ${t1[1]}分</strong>，同时叠加<strong>${DIM_NAMES[t2[0]]}</strong>和<strong>${DIM_NAMES[t3[0]]}</strong>。这说明你最有价值的不是某一个单点，而是几项能力一起工作。`,
+      `你的主策略更偏<strong>${track}</strong>，五项竞争方式里最突出的是<strong>${INDEXES[si[0]].name} ${si[1]}分</strong>。简单说，你在需要资源和机会时，最容易先调用这套方式。`,
+      `最值得做的是：${useMap[t1[0]]}。不要为了让雷达图更平均而分散精力，先把最强能力变成可重复、可积累、能带来现实回报的资产。`
     ].map(x=>`<p>${x}</p>`).join('');
   }
 
   function weaknessAnalysis(){
-    const [b1,b2,b3]=bottom.slice(0,3); const wi=weakestIndex(); const gap=Math.abs(M-F);
+    const [b1,b2]=bottom.slice(0,2); const wi=weakestIndex();
+    const riskMap={
+      D:'真正需要开口争取时容易退到后面',
+      T:'真实价值不一定能被别人快速看见',
+      I:'离开熟悉平台或关系后，重新建立价值的成本会更高',
+      G:'很多事情都靠自己做，时间容易成为上限',
+      U:'知道怎么做得更好，但未必愿意为更高位置承担竞争成本'
+    };
     return [
-      `所谓“致命短板”并不是指你最低的三个分数一定会让你失败。真正危险的是：<strong>当一个人长期只使用最擅长的方式解决所有问题，优势会逐渐变成盲区。</strong> ${p.name}最典型的三个阴影是：${p.shadow.join('、')}。这些问题不会在早期马上出现，因为你的优势足以帮你获得不少正反馈；它们往往在进入更高层级、更复杂关系或更大资源之后才开始限制你。`,
-      `你目前相对最低的维度是<strong>${DIM_NAMES[b1[0]]} ${b1[1]}分</strong>。${DIMENSIONS[b1[0]].meaning}${DIMENSIONS[b1[0]].low} 这里最需要避免的误区是“既然不是我的强项，就完全不需要管”。事实上，低分维度通常不需要被补成优势，只需要达到不会拖累主赛道的最低标准。例如外貌呈现不需要追求极致，只要重要场合不让价值被低估；执行不需要变成工作狂，只要关键承诺可以稳定落地；竞争野心不需要变强势，只要重要利益出现时敢明确争取。`,
-      `第二和第三个需要留意的方向是<strong>${DIM_NAMES[b2[0]]} ${b2[1]}分</strong>与<strong>${DIM_NAMES[b3[0]]} ${b3[1]}分</strong>。这两项和最低维度之间如果同时偏低，会形成一个“结构性缺口”：你可能非常会打开机会，却无法完成转化；非常有实力，却长期没有人看见；很会理解别人，却不擅长为自己争取；或者很有野心，却缺少长期判断。真正应该补的是这种“链条断点”，不是为了让雷达图变圆。`,
-      `五项竞争方式里，你相对最低的是<strong>${INDEXES[wi[0]].name} ${wi[1]}分</strong>。${INDEXES[wi[0]].meaning} 这项较弱时，最容易出现的风险是：${wi[0]==='D'?'你看得懂机会，却在真正需要提出要求、谈价格、争位置时退到后面':wi[0]==='T'?'你有真实价值，但别人不一定能快速感知，因此经常需要更长时间证明自己':wi[0]==='I'?'外部环境和关系一旦变化，你重新建立价值的成本会明显上升':wi[0]==='G'?'所有问题都靠自己解决，个人时间逐渐成为增长上限':'你知道怎么做得更好，却不一定愿意为更高位置承担竞争成本'}。这不是要求你改变人格，而是要建立一个最低保护机制。`,
-      `你的雄竞/雌竞差值是<strong>${gap}分</strong>。${gap>=25?'这属于明显单轨倾向。好处是你非常容易形成清晰优势，风险是当环境突然不再奖励这套方式时，切换成本会比较高。':gap>=13?'你的主策略已经比较明确，但第二赛道仍然可以训练成辅助工具。':'两条赛道距离不大，你真正的风险反而是同时想维护太多能力，导致精力分散。'} 因此，你的补短板策略应该围绕“增加选择权”，而不是追求一个完美人格。`,
-      `最后要特别提醒：${p.shadow[0]}往往会在你最顺的时候出现。因为人天然会重复使用曾经有效的方法。${p.name}真正的升级，不是抛弃原有优势，而是在优势开始失效前就知道什么时候应该切换。例如，当关系已经无法弥补交付问题时，就回到硬实力；当硬实力长期没有被看见时，就补呈现和关系；当环境的上限已经很低时，就换赛道；当所有增长都依赖外部资源时，就开始积累自有资产。所谓致命短板，最终指向的都是同一件事：<strong>不要让唯一的一种成功经验，变成你唯一会使用的答案。</strong>`
+      `你的主要风险不是“分数低”，而是把优势用过头。<strong>${p.name}</strong>最需要留意：${p.shadow.join('、')}。`,
+      `目前相对较弱的是<strong>${DIM_NAMES[b1[0]]} ${b1[1]}分</strong>和<strong>${DIM_NAMES[b2[0]]} ${b2[1]}分</strong>。它们不需要被补成优势，只要提高到不会拖累主赛道即可。`,
+      `五项竞争方式里相对最弱的是<strong>${INDEXES[wi[0]].name} ${wi[1]}分</strong>。最常见的表现是${riskMap[wi[0]]}。给自己建立一个最低保护机制，比强行改变人格更有效。`
     ].map(x=>`<p>${x}</p>`).join('');
   }
 
@@ -224,13 +246,13 @@
   document.getElementById('keywordBadge').textContent=p.keywords;
   document.getElementById('secondaryBadge').textContent=`第二人格 · ${s.name}`;
   document.getElementById('profileTitle').textContent=`${p.name}：你的核心竞争逻辑`;
-  document.getElementById('profileCore').textContent=p.core;
+  document.getElementById('profileCore').textContent=firstSentences(p.core,2);
   document.getElementById('profileWin').textContent=p.win;
   document.getElementById('profileStake').textContent=p.stake;
-  document.getElementById('profileBoundary').textContent=p.boundary;
+  document.getElementById('profileBoundary').textContent=firstSentences(p.boundary,1);
   document.getElementById('secondaryName').textContent=s.name;
   document.getElementById('secondaryTagline').textContent=s.tagline;
-  document.getElementById('secondaryText').textContent=`主人格决定你最自然、最稳定的竞争主引擎；第二人格则代表当场景变化时，你最容易调用的辅助方式。${s.core} 对${p.name}来说，它的价值不是取代主人格，而是补足主人格在某些环境中的盲区。`;
+  document.getElementById('secondaryText').textContent=`它代表你在另一类场景中容易调用的辅助策略。${firstSentences(s.core,1)} 它的作用是补充主人格，而不是取代主人格。`;
 
   function animateNumber(el,target){const start=performance.now();function tick(now){const t=Math.min(1,(now-start)/700);el.textContent=Math.round(target*(1-Math.pow(1-t,3)));if(t<1)requestAnimationFrame(tick);}requestAnimationFrame(tick);}
   animateNumber(document.getElementById('mScore'),M); animateNumber(document.getElementById('fScore'),F);
@@ -240,7 +262,8 @@
   ['E','A','S','W','C','R','L'].forEach(key=>{
     const value=d[key], info=DIMENSIONS[key];
     const row=document.createElement('article'); row.className='dimension-detail';
-    row.innerHTML=`<div class="dimension-head"><div><strong>${info.name}</strong><span>${band(value)}</span></div><b>${value}</b></div><div class="meter"><i data-width="${value}"></i></div><p>${info.meaning}</p><p class="dimension-interpretation"><strong>你的分数意味着：</strong>${value>=70?info.high:value<45?info.low:`你目前处在中间区间，说明这项能力会根据场景、兴趣和压力水平变化。它不是你最稳定的武器，也暂时不是明显短板。`}</p>`;
+    const interp=value>=70?firstSentences(info.high,1):value<45?firstSentences(info.low,1):'这项能力会随场景变化，目前既不是主要优势，也不是明显短板。';
+    row.innerHTML=`<div class="dimension-head"><div><strong>${info.name}</strong><span>${band(value)}</span></div><b>${value}</b></div><div class="meter"><i data-width="${value}"></i></div><p>${firstSentences(info.meaning,1)}</p><p class="dimension-interpretation"><strong>你的分数：</strong>${interp}</p>`;
     dimList.appendChild(row);
   });
   setTimeout(()=>document.querySelectorAll('.meter i').forEach(i=>i.style.width=`${i.dataset.width}%`),120);
@@ -248,7 +271,7 @@
   const indexGrid=document.getElementById('indexGrid');
   Object.entries(indexes).forEach(([key,value])=>{
     const info=INDEXES[key]; const div=document.createElement('article'); div.className='strategy-card';
-    div.innerHTML=`<div class="strategy-head"><span>${info.name}</span><strong>${value}</strong></div><div class="strategy-band">当前水平：${indexBand(value)}</div><p>${info.meaning}</p>`;
+    div.innerHTML=`<div class="strategy-head"><span>${info.name}</span><strong>${value}</strong></div><div class="strategy-band">当前水平：${indexBand(value)}</div><p>${firstSentences(info.meaning,1)}</p>`;
     indexGrid.appendChild(div);
   });
 
@@ -257,19 +280,17 @@
 
   const c=CAREER[primary];
   document.getElementById('careerMap').innerHTML=`
-    <div class="career-lead"><h3>为什么适合</h3><p>${c.logic}</p></div>
     <div class="career-grid">
-      <div><h3>更容易发挥的环境</h3><p>${c.best}</p></div>
-      <div><h3>优先探索的方向</h3><ul>${c.roles.map(x=>`<li>${x}</li>`).join('')}</ul></div>
-      <div><h3>职业风险</h3><p>${c.risk}</p></div>
-      <div><h3>下一阶段动作</h3><p>${c.move}</p></div>
+      <div><h3>更适合的环境</h3><p>${firstSentences(c.best,1)}</p></div>
+      <div><h3>可以优先探索</h3><ul>${c.roles.slice(0,4).map(x=>`<li>${x}</li>`).join('')}</ul></div>
+      <div><h3>需要注意</h3><p>${firstSentences(c.risk,1)}</p></div>
     </div>`;
 
   const selectedAssets=assetSelection();
   const assetList=document.getElementById('assetList');
   selectedAssets.forEach((name,i)=>{
     const x=ASSET_DETAILS[name]; const el=document.createElement('article'); el.className='asset-item';
-    el.innerHTML=`<div class="asset-number">${String(i+1).padStart(2,'0')}</div><div><h3>${name}</h3><p><strong>它是什么：</strong>${x.what}</p><p><strong>为什么对你重要：</strong>${x.why}</p><p><strong>怎么开始积累：</strong>${x.how}</p></div>`;
+    el.innerHTML=`<div class="asset-number">${String(i+1).padStart(2,'0')}</div><div><h3>${name}</h3><p>${firstSentences(x.why,1)} <strong>建议：</strong>${firstSentences(x.how,1)}</p></div>`;
     assetList.appendChild(el);
   });
 

@@ -1,11 +1,23 @@
 (() => {
   const questions = window.QUIZ_QUESTIONS;
   const scaleLabels = ['非常不符合','比较不符合','一般','比较符合','非常符合'];
-  const dimLabels = {E:'底层能力 · 情绪洞察',A:'底层能力 · 外貌呈现',S:'底层能力 · 社交资本',W:'底层能力 · 工作执行',C:'底层能力 · 竞争野心',R:'底层能力 · 战略认知',L:'底层能力 · 资源杠杆',K69:'最终校准',K70:'最终校准',K71:'最终校准',K72:'最终校准'};
+  const QUIZ_SCHEMA_VERSION = 'v8';
 
-  if (!localStorage.getItem('competition_quiz_code')) {
-    location.href = 'redeem.html';
-    return;
+  // 题目不展示测量维度，减少受试者按“想得到的类型”作答。
+  if (localStorage.getItem('competition_quiz_schema') !== QUIZ_SCHEMA_VERSION) {
+    localStorage.removeItem('competition_quiz_index');
+    localStorage.removeItem('competition_quiz_answers');
+    localStorage.removeItem('competition_quiz_completed');
+    localStorage.setItem('competition_quiz_schema', QUIZ_SCHEMA_VERSION);
+  }
+
+  // 公开测试版：无需兑换码，任何人都可以直接开始。
+  // 如果上一份测试已经完成，再次进入时自动开启一份新测试；
+  // 未完成的测试则继续保留进度。
+  if (localStorage.getItem('competition_quiz_completed') === '1') {
+    localStorage.removeItem('competition_quiz_index');
+    localStorage.removeItem('competition_quiz_answers');
+    localStorage.removeItem('competition_quiz_completed');
   }
 
   let index = Number(localStorage.getItem('competition_quiz_index') || 0);
@@ -31,7 +43,9 @@
     const q = questions[index];
     count.textContent = `${String(index + 1).padStart(2,'0')} / 72`;
     bar.style.width = `${((index + 1) / 72) * 100}%`;
-    meta.textContent = q.type === 'binary' ? '策略选择 · 强制二选一' : (dimLabels[q.dimension] || '最终校准');
+    meta.textContent = q.type === 'binary'
+      ? '情境选择 · 选更接近你的反应'
+      : (q.id <= 56 ? '行为判断 · 按真实习惯作答' : '补充判断 · 按第一反应作答');
     title.textContent = q.text;
     answersEl.innerHTML = '';
 
