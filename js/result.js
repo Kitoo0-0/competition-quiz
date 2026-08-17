@@ -185,123 +185,274 @@
   const top=Object.entries(d).sort((a,b)=>b[1]-a[1]);
   const bottom=[...top].reverse();
 
-  function band(v){ if(v>=85)return '显著优势'; if(v>=70)return '优势区'; if(v>=45)return '常规区'; if(v>=30)return '潜在短板'; return '明显短板'; }
+  function band(v){ if(v>=85)return '很强'; if(v>=70)return '较强'; if(v>=45)return '中等'; if(v>=30)return '偏弱'; return '较弱'; }
   function indexBand(v){ if(v>=80)return '很强'; if(v>=60)return '较强'; if(v>=40)return '中等'; return '较弱'; }
-  function strongestIndex(){ return Object.entries(indexes).sort((a,b)=>b[1]-a[1])[0]; }
-  function weakestIndex(){ return Object.entries(indexes).sort((a,b)=>a[1]-b[1])[0]; }
   function firstSentences(text,count=1){
     const parts=String(text||'').match(/[^。！？]+[。！？]?/g) || [String(text||'')];
     return parts.slice(0,count).join('').trim();
   }
 
-  function strengthAnalysis(){
-    const [t1,t2,t3]=top.slice(0,3); const si=strongestIndex();
-    const track=M>F?'雄竞':'雌竞';
-    const useMap={
-      E:'把读人能力用在沟通、谈判和筛选关系上',
-      A:'把呈现能力用在关键场合与长期个人形象上',
-      S:'把关系能力沉淀成稳定的推荐与合作网络',
-      W:'把执行力沉淀成作品、流程和可靠信用',
-      C:'把竞争欲集中到真正能改变收入、位置或选择权的目标上',
-      R:'把判断力沉淀成自己的决策框架',
-      L:'把借力意识沉淀成渠道、平台和长期合作结构'
-    };
-    return [
-      `你的优势核心是<strong>${DIM_NAMES[t1[0]]} ${t1[1]}分</strong>，同时叠加<strong>${DIM_NAMES[t2[0]]}</strong>和<strong>${DIM_NAMES[t3[0]]}</strong>。这说明你最有价值的不是某一个单点，而是几项能力一起工作。`,
-      `你的主策略更偏<strong>${track}</strong>，五项竞争方式里最突出的是<strong>${INDEXES[si[0]].name} ${si[1]}分</strong>。简单说，你在需要资源和机会时，最容易先调用这套方式。`,
-      `最值得做的是：${useMap[t1[0]]}。不要为了让雷达图更平均而分散精力，先把最强能力变成可重复、可积累、能带来现实回报的资产。`
-    ].map(x=>`<p>${x}</p>`).join('');
-  }
+  const DIM_BRIEF={
+    E:'看懂情绪、需求和关系里的变化',
+    A:'让别人快速看懂你的优势和状态',
+    S:'建立、维护并调用有质量的关系',
+    W:'把想法稳定推进成看得见的结果',
+    C:'愿意主动争取更高的位置和机会',
+    R:'看长期、看利益结构、抓关键变量',
+    L:'用平台、人脉、工具和合作放大结果'
+  };
+  const DIM_USE={
+    E:'你很会捕捉别人没直接说出口的信息。把它用在沟通、谈判和筛选关系上，会比单纯“会照顾情绪”更有价值。',
+    A:'你能把真实价值更快地呈现出来。关键场合的形象、表达和状态，会帮你少花很多解释成本。',
+    S:'你擅长让关系继续发生，而不是只认识一次。把这种能力沉淀成推荐、合作和长期网络，会形成复利。',
+    W:'你能把事情真正做完。稳定交付会让别人更愿意把重要任务、客户和资源交给你。',
+    C:'你有明显的向上动力。把竞争欲集中在少数真正改变收入、位置或选择权的目标上，效果最好。',
+    R:'你更容易看懂表面规则背后的利益和关键变量。重大选择时，你的判断力本身就是优势。',
+    L:'你不太会只靠自己硬扛。找到合适的平台、工具和合作方，能让同样的时间产生更大结果。'
+  };
+  const DIM_RISK={
+    E:'复杂关系里，你可能较晚发现对方的情绪和立场已经变了。',
+    A:'你的真实价值可能高于别人第一眼能感知到的价值。',
+    S:'你容易错过依赖信任、推荐和弱关系流动的机会。',
+    W:'想法和机会可能跑在现实成果前面，最后卡在执行。',
+    C:'你可能知道自己可以更进一步，却不一定主动去争取。',
+    R:'重大选择时容易被眼前结果或熟悉经验带着走。',
+    L:'很多事情都靠自己做，最后最先撞到的是时间上限。'
+  };
+  const DIM_FIX={
+    E:'重要沟通前多问一句“对方真正顾虑什么”，不要只听表面回答。',
+    A:'只补关键场合：头像、简历、见客户和公开表达，不需要把生活变成形象工程。',
+    S:'每周主动维护 2 个值得长期联系的人，先从真实互惠开始。',
+    W:'把目标拆成可交付节点，每周至少留下一个能被别人验证的结果。',
+    C:'每个月主动争取一次更高报价、更大责任或更好的机会，训练开口。',
+    R:'重大决定写下三个选项、机会成本和最坏结果，避免只凭当下感觉。',
+    L:'每遇到重复任务先问：能否借工具、平台、合作或流程把它放大。'
+  };
+  const STRATEGY_BRIEF={
+    D:'资源有限时，你会不会直接开口、争取、竞争。',
+    T:'别人能不能快速感受到你的价值，并愿意优先选择你。',
+    I:'离开熟悉平台和关系后，你还能不能靠自己重新做出结果。',
+    G:'你会不会用人、平台、工具和资源，把个人能力放大。',
+    U:'你有多想往更高收入、位置、圈层或选择权走。'
+  };
+  const STRATEGY_RISK={
+    D:'真正需要开口争取时，你容易退到后面。',
+    T:'你可能有实力，但别人不一定能快速感受到。',
+    I:'离开熟悉环境后，重新建立价值的成本会比较高。',
+    G:'很多事情都自己做，时间会慢慢变成上限。',
+    U:'知道怎么做得更好，却未必愿意为更高一层承担竞争成本。'
+  };
+  const STRATEGY_FIX={
+    D:'给自己设一个“必须主动开口”的场景：报价、申请、谈资源或争项目。',
+    T:'把价值表达得更直接：你是谁、你解决什么问题、为什么值得选你。',
+    I:'持续积累能带走的作品、技能和独立收入来源。',
+    G:'每周找一件重复劳动，尝试用工具、合作或流程替代纯手工。',
+    U:'不用强迫自己卷，但要明确哪些目标值得你真正去争。'
+  };
 
-  function weaknessAnalysis(){
-    const [b1,b2]=bottom.slice(0,2); const wi=weakestIndex();
-    const riskMap={
-      D:'真正需要开口争取时容易退到后面',
-      T:'真实价值不一定能被别人快速看见',
-      I:'离开熟悉平台或关系后，重新建立价值的成本会更高',
-      G:'很多事情都靠自己做，时间容易成为上限',
-      U:'知道怎么做得更好，但未必愿意为更高位置承担竞争成本'
-    };
-    return [
-      `你的主要风险不是“分数低”，而是把优势用过头。<strong>${p.name}</strong>最需要留意：${p.shadow.join('、')}。`,
-      `目前相对较弱的是<strong>${DIM_NAMES[b1[0]]} ${b1[1]}分</strong>和<strong>${DIM_NAMES[b2[0]]} ${b2[1]}分</strong>。它们不用练成强项，只要别在关键时候拖后腿就够了。`,
-      `五项竞争方式里相对最弱的是<strong>${INDEXES[wi[0]].name} ${wi[1]}分</strong>。最常见的表现是${riskMap[wi[0]]}。给自己建立一个最低保护机制，比强行改变人格更有效。`
-    ].map(x=>`<p>${x}</p>`).join('');
-  }
+  const ENVIRONMENTS={
+    A01:{fit:['有明确晋升与授权空间','需要跨部门推进复杂项目','结果做得越好，决策权越大'],avoid:['长期只有执行，没有权限','责任很重但资源配不上','头衔很多、真实权力很少']},
+    A02:{fit:['专业门槛高、经验会复利','成果能被作品或数据验证','允许长期做深一个领域'],avoid:['频繁追热点、深度不被奖励','只看包装不看真实能力','工作内容长期高度重复']},
+    A03:{fit:['离客户和决策者近','反馈快、结果能量化','个人可以经营客户与渠道'],avoid:['长期远离市场和客户','流程很长但个人无法推动','做很多协调却没有结果归属']},
+    A04:{fit:['有自主权和所有权','允许快速试错的新业务','产品、团队或市场可以从零搭建'],avoid:['规则完全固定、改动空间很小','只能执行别人已经定好的方案','风险和收益完全不对称']},
+    A05:{fit:['信息密度高、需要做选择','长期判断比忙碌更值钱','能讨论赔率、风险和资源配置'],avoid:['只奖励工作时长','信息极少却要求精确预测','没有任何试错和退出空间']},
+    A06:{fit:['专业能力能直接建立个人信用','允许公开表达与案例展示','专业服务可以产品化'],avoid:['个人价值完全藏在组织后面','只能靠流量不能靠专业','大量曝光却没有产品承接']},
+    B01:{fit:['长期信任比短期刺激重要','关系质量会影响复购和合作','节奏稳定、边界清楚'],avoid:['长期高冲突和情绪消耗','总让你做隐形照顾工作','关系投入很多却没有回报']},
+    B02:{fit:['重视场合、分寸与体验','高端客户或品牌环境','社交信用会持续积累'],avoid:['为了融入必须持续高消费','只比身份、不看真实价值','关系很多但没有任何互惠']},
+    B03:{fit:['第一印象和个人状态重要','需要曝光、表达和现场感染力','注意力能快速转成机会'],avoid:['完全看不到个人差异','长期只做幕后重复工作','只获得关注却没有后续承接']},
+    B04:{fit:['重视认知、沟通和判断','允许深度交流与独立思考','人与人之间需要长期理解'],avoid:['长期只做表面社交','不允许提出不同判断','高情绪消耗、低思考空间']},
+    B05:{fit:['需要长期协调多方关系','现实事务复杂但可被安排','信任和稳定会产生长期价值'],avoid:['永远让你兜底却不给权限','隐形劳动没人看见','家庭或团队边界长期混乱']},
+    B06:{fit:['平台和环境差异明显','可以接触更高质量的人和信息','能力能随环境一起升级'],avoid:['只追求“看起来高级”','频繁换圈却没有个人积累','身份比较大于真实成长']},
+    C01:{fit:['复杂、多方、责任大的场景','既需要拿结果也需要带人','最终结果有清晰负责人'],avoid:['什么都让你一个人扛','只有协调没有决策权','长期过载却没有资源升级']},
+    C02:{fit:['多方资源可以互补','需要合作、撮合和平台能力','网络和信用能持续复用'],avoid:['合作很多但自己没有资产','关系高度依赖单一关键人物','项目结束后什么都没留下']},
+    C03:{fit:['专业、表达和个人风格都能被看见','内容可以承接到产品或服务','允许建立长期公众影响力'],avoid:['只追流量不做产品','完全依赖单一平台','曝光速度远快于能力成长']},
+    D01:{fit:['时间和节奏有自主权','收入稳定、边界清楚','结果够用即可，不强迫无止境升级'],avoid:['长期高强度排名竞争','为了身份持续牺牲生活','不争取就会失去基本选择权']}
+  };
+
+  function strongestIndex(){ return Object.entries(indexes).sort((a,b)=>b[1]-a[1])[0]; }
+  function weakestIndex(){ return Object.entries(indexes).sort((a,b)=>a[1]-b[1])[0]; }
 
   function assetSelection(){
     const assetAdd={E:'情绪边界',A:'个人形象',S:'高质量弱关系',W:'可迁移技能',C:'行业信用',R:'高价值信息源',L:'渠道资产'};
     const arr=[...(BASE_ASSETS[primary]||[])];
     top.forEach(([key])=>{ const a=assetAdd[key]; if(a&&!arr.includes(a))arr.push(a); });
-    // Ensure all assets have descriptions and exactly five.
     const fallback=['稳定现金流','可迁移技能','高质量弱关系','高价值信息源','情绪边界'];
     fallback.forEach(a=>{if(!arr.includes(a))arr.push(a)});
     return arr.filter(a=>ASSET_DETAILS[a]).slice(0,5);
   }
 
-  // Header / profile
+  function axisText(){
+    const gap=Math.abs(M-F);
+    if(gap<=8) return {label:'双轨比较均衡',text:'你既能直接争取，也会通过关系、呈现和借力提高被选择的概率。'};
+    if(M>F) return {label:'更偏直接争取',text:'遇到机会时，你更容易先靠能力、结果和主动争取去拿到资源。'};
+    return {label:'更偏被选择与借力',text:'遇到机会时，你更容易先提高自己的被选择概率，再用关系、环境和资源放大结果。'};
+  }
+
+  function animateNumber(el,target){
+    const start=performance.now();
+    function tick(now){
+      const t=Math.min(1,(now-start)/700);
+      el.textContent=Math.round(target*(1-Math.pow(1-t,3)));
+      if(t<1)requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // 顶部总览：先给结论，再给分数。
+  const axis=axisText();
   document.getElementById('primaryName').textContent=p.name;
   document.getElementById('primaryTagline').textContent=p.tagline;
+  document.getElementById('overviewCore').textContent=firstSentences(p.core,2);
   document.getElementById('trackBadge').textContent=`${p.track}倾向`;
-  document.getElementById('keywordBadge').textContent=p.keywords;
   document.getElementById('secondaryBadge').textContent=`第二人格 · ${s.name}`;
-  document.getElementById('profileTitle').textContent=`${p.name}：你更习惯这样竞争`;
-  document.getElementById('profileCore').textContent=firstSentences(p.core,2);
-  document.getElementById('profileWin').textContent=p.win;
-  document.getElementById('profileStake').textContent=p.stake;
-  document.getElementById('profileBoundary').textContent=firstSentences(p.boundary,1);
-  document.getElementById('secondaryName').textContent=s.name;
-  document.getElementById('secondaryTagline').textContent=s.tagline;
-  document.getElementById('secondaryText').textContent=`除了主人格，你也有明显的${s.name}倾向。${firstSentences(s.core,1)} 在不同场景里，这一面会比平时更明显。`;
+  document.getElementById('secondaryNote').textContent=`${s.name}是你的第二人格：${s.tagline}`;
+  document.getElementById('axisLabel').textContent=axis.label;
+  document.getElementById('axisSummary').textContent=axis.text;
+  animateNumber(document.getElementById('mScore'),M);
+  animateNumber(document.getElementById('fScore'),F);
+  setTimeout(()=>{
+    document.getElementById('mBar').style.width=`${M}%`;
+    document.getElementById('fBar').style.width=`${F}%`;
+  },120);
 
-  function animateNumber(el,target){const start=performance.now();function tick(now){const t=Math.min(1,(now-start)/700);el.textContent=Math.round(target*(1-Math.pow(1-t,3)));if(t<1)requestAnimationFrame(tick);}requestAnimationFrame(tick);}
-  animateNumber(document.getElementById('mScore'),M); animateNumber(document.getElementById('fScore'),F);
+  const [top1,top2,top3]=top.slice(0,3);
+  const [low1,low2]=bottom.slice(0,2);
+  const strongIndex=strongestIndex();
+  const weakIndex=weakestIndex();
 
-  // Seven dimensions in fixed conceptual order, not sorted, so the report is easier to learn.
+  document.getElementById('quickStrength').textContent=`${DIM_NAMES[top1[0]]} ${top1[1]}`;
+  document.getElementById('quickStrengthText').textContent=DIM_BRIEF[top1[0]];
+  document.getElementById('quickStrategy').textContent=`${INDEXES[strongIndex[0]].name} ${strongIndex[1]}`;
+  document.getElementById('quickStrategyText').textContent=STRATEGY_BRIEF[strongIndex[0]];
+  document.getElementById('quickWatch').textContent=`${DIM_NAMES[low1[0]]} ${low1[1]}`;
+  document.getElementById('quickWatchText').textContent=DIM_RISK[low1[0]];
+
+  // 七维能力：雷达看结构，横条看具体分数。
   const dimList=document.getElementById('dimensionList');
   ['E','A','S','W','C','R','L'].forEach(key=>{
     const value=d[key], info=DIMENSIONS[key];
-    const row=document.createElement('article'); row.className='dimension-detail';
-    const interp=value>=70?firstSentences(info.high,1):value<45?firstSentences(info.low,1):'这项能力会随场景变化，目前既不是主要优势，也不是明显短板。';
-    row.innerHTML=`<div class="dimension-head"><div><strong>${info.name}</strong><span>${band(value)}</span></div><b>${value}</b></div><div class="meter"><i data-width="${value}"></i></div><p>${firstSentences(info.meaning,1)}</p><p class="dimension-interpretation"><strong>你的分数：</strong>${interp}</p>`;
+    const row=document.createElement('article');
+    row.className='dimension-visual-row';
+    const result=value>=70?`这项是你的${value>=85?'明显':'稳定'}优势。`:value<45?'这项目前更容易成为卡点。':'这项处在中间区，会随场景变化。';
+    row.innerHTML=`
+      <div class="dimension-visual-head">
+        <div><strong>${info.name}</strong><span>${DIM_BRIEF[key]}</span></div>
+        <div class="dimension-score"><b>${value}</b><em>${band(value)}</em></div>
+      </div>
+      <div class="visual-meter"><i data-width="${value}"></i></div>
+      <p>${result}</p>`;
     dimList.appendChild(row);
   });
-  setTimeout(()=>document.querySelectorAll('.meter i').forEach(i=>i.style.width=`${i.dataset.width}%`),120);
+  document.getElementById('radarTop').textContent=`最强：${DIM_NAMES[top1[0]]} ${top1[1]}`;
+  document.getElementById('radarBottom').textContent=`相对最低：${DIM_NAMES[low1[0]]} ${low1[1]}`;
 
+  // 五项竞争方式：每张卡只保留“是什么 + 你的水平”。
   const indexGrid=document.getElementById('indexGrid');
   Object.entries(indexes).forEach(([key,value])=>{
-    const info=INDEXES[key]; const div=document.createElement('article'); div.className='strategy-card';
-    div.innerHTML=`<div class="strategy-head"><span>${info.name}</span><strong>${value}</strong></div><div class="strategy-band">当前水平：${indexBand(value)}</div><p>${firstSentences(info.meaning,1)}</p>`;
+    const div=document.createElement('article');
+    div.className='strategy-visual-card';
+    div.innerHTML=`
+      <div class="strategy-visual-top"><span>${INDEXES[key].name}</span><strong>${value}</strong></div>
+      <div class="strategy-level">${indexBand(value)}</div>
+      <p>${STRATEGY_BRIEF[key]}</p>
+      <div class="strategy-meter"><i data-width="${value}"></i></div>`;
     indexGrid.appendChild(div);
   });
 
-  document.getElementById('strengthAnalysis').innerHTML=strengthAnalysis();
-  document.getElementById('weaknessAnalysis').innerHTML=weaknessAnalysis();
+  // 三个优势：结论 / 为什么有用 / 怎么使用。
+  const strengthCards=document.getElementById('strengthCards');
+  [top1,top2,top3].forEach(([key,value],i)=>{
+    const card=document.createElement('article');
+    card.className='insight-card';
+    card.innerHTML=`
+      <div class="insight-number">0${i+1}</div>
+      <div class="insight-title-row"><h3>${DIM_NAMES[key]}</h3><strong>${value}</strong></div>
+      <p>${DIM_USE[key]}</p>
+      <div class="insight-action"><span>怎么用</span>${DIM_FIX[key].replace('不要只听表面回答。','')}</div>`;
+    strengthCards.appendChild(card);
+  });
 
+  // 两个相对弱维度 + 一个最弱竞争动作，避免长篇“致命短板”。
+  const watchCards=document.getElementById('watchCards');
+  const watchItems=[
+    {name:DIM_NAMES[low1[0]],score:low1[1],text:DIM_RISK[low1[0]],fix:DIM_FIX[low1[0]]},
+    {name:DIM_NAMES[low2[0]],score:low2[1],text:DIM_RISK[low2[0]],fix:DIM_FIX[low2[0]]},
+    {name:INDEXES[weakIndex[0]].name,score:weakIndex[1],text:STRATEGY_RISK[weakIndex[0]],fix:STRATEGY_FIX[weakIndex[0]]}
+  ];
+  watchItems.forEach((item,i)=>{
+    const card=document.createElement('article');
+    card.className='insight-card watch-card';
+    card.innerHTML=`
+      <div class="insight-number">0${i+1}</div>
+      <div class="insight-title-row"><h3>${item.name}</h3><strong>${item.score}</strong></div>
+      <p>${item.text}</p>
+      <div class="insight-action"><span>最低保护</span>${item.fix}</div>`;
+    watchCards.appendChild(card);
+  });
+
+  // 环境匹配。
+  const env=ENVIRONMENTS[primary] || ENVIRONMENTS.D01;
+  document.getElementById('fitEnvironment').innerHTML=env.fit.map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('avoidEnvironment').innerHTML=env.avoid.map(x=>`<li>${x}</li>`).join('');
+
+  // 职业方向：只留原因、角色和一个风险提醒。
   const c=CAREER[primary];
-  document.getElementById('careerMap').innerHTML=`
-    <div class="career-grid">
-      <div><h3>更适合的环境</h3><p>${firstSentences(c.best,1)}</p></div>
-      <div><h3>可以优先探索</h3><ul>${c.roles.slice(0,4).map(x=>`<li>${x}</li>`).join('')}</ul></div>
-      <div><h3>需要注意</h3><p>${firstSentences(c.risk,1)}</p></div>
-    </div>`;
+  document.getElementById('careerReason').textContent=firstSentences(c.logic,2);
+  document.getElementById('careerRoles').innerHTML=c.roles.slice(0,6).map(x=>`<span>${x}</span>`).join('');
+  document.getElementById('careerRisk').textContent=firstSentences(c.risk,2);
 
+  // 资产：一句解释 + 一个动作。
   const selectedAssets=assetSelection();
   const assetList=document.getElementById('assetList');
   selectedAssets.forEach((name,i)=>{
-    const x=ASSET_DETAILS[name]; const el=document.createElement('article'); el.className='asset-item';
-    el.innerHTML=`<div class="asset-number">${String(i+1).padStart(2,'0')}</div><div><h3>${name}</h3><p>${firstSentences(x.why,1)} <strong>建议：</strong>${firstSentences(x.how,1)}</p></div>`;
+    const x=ASSET_DETAILS[name];
+    const el=document.createElement('article');
+    el.className='asset-visual-item';
+    el.innerHTML=`
+      <div class="asset-rank">${String(i+1).padStart(2,'0')}</div>
+      <div class="asset-body"><h3>${name}</h3><p>${firstSentences(x.why,1)}</p><small>${firstSentences(x.how,1)}</small></div>`;
     assetList.appendChild(el);
   });
 
+  // 90天：不再写长计划，只给三个可执行动作。
+  const actionTimeline=document.getElementById('actionTimeline');
+  const actionItems=[
+    {time:'0—30 天',title:`把 ${DIM_NAMES[top1[0]]} 用出结果`,text:DIM_FIX[top1[0]]},
+    {time:'31—60 天',title:`补住 ${DIM_NAMES[low1[0]]} 的缺口`,text:DIM_FIX[low1[0]]},
+    {time:'61—90 天',title:'做一次现实验证',text:firstSentences(c.move,2)}
+  ];
+  actionTimeline.innerHTML=actionItems.map((x,i)=>`
+    <article class="action-step">
+      <div class="action-dot"><span>${i+1}</span></div>
+      <div><small>${x.time}</small><h3>${x.title}</h3><p>${x.text}</p></div>
+    </article>`).join('');
+
   function renderRadar(){
-    const svg=document.getElementById('radar'), keys=['E','A','S','W','C','R','L'], cx=160,cy=160,radius=112,n=keys.length;let html='';
-    for(let level=1;level<=4;level++){const points=keys.map((_,i)=>{const a=-Math.PI/2+i*2*Math.PI/n,r=radius*level/4;return `${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`;}).join(' ');html+=`<polygon points="${points}" fill="none" stroke="#e8e7e2"/>`;}
-    keys.forEach((key,i)=>{const a=-Math.PI/2+i*2*Math.PI/n,x=cx+Math.cos(a)*radius,y=cy+Math.sin(a)*radius;html+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#eeeeea"/>`;html+=`<text x="${cx+Math.cos(a)*(radius+25)}" y="${cy+Math.sin(a)*(radius+25)+4}" fill="#74746f" font-size="11" text-anchor="middle">${DIM_NAMES[key]}</text>`;});
-    const pts=keys.map((key,i)=>{const a=-Math.PI/2+i*2*Math.PI/n,r=radius*d[key]/100;return `${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`;}).join(' ');html+=`<polygon points="${pts}" fill="rgba(139,107,63,.10)" stroke="#8b6b3f" stroke-width="2"/>`;svg.innerHTML=html;
+    const svg=document.getElementById('radar'), keys=['E','A','S','W','C','R','L'], cx=160,cy=160,radius=106,n=keys.length;let html='';
+    for(let level=1;level<=4;level++){
+      const points=keys.map((_,i)=>{const a=-Math.PI/2+i*2*Math.PI/n,r=radius*level/4;return `${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`;}).join(' ');
+      html+=`<polygon points="${points}" fill="none" stroke="#e9e5dd"/>`;
+    }
+    keys.forEach((key,i)=>{
+      const a=-Math.PI/2+i*2*Math.PI/n,x=cx+Math.cos(a)*radius,y=cy+Math.sin(a)*radius;
+      html+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#efede8"/>`;
+      html+=`<text x="${cx+Math.cos(a)*(radius+27)}" y="${cy+Math.sin(a)*(radius+27)+4}" fill="#6f6a63" font-size="10.5" text-anchor="middle">${DIM_NAMES[key]}</text>`;
+    });
+    const pts=keys.map((key,i)=>{const a=-Math.PI/2+i*2*Math.PI/n,r=radius*d[key]/100;return `${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`;}).join(' ');
+    html+=`<polygon points="${pts}" fill="rgba(139,107,63,.11)" stroke="#7f6240" stroke-width="2"/>`;
+    keys.forEach((key,i)=>{
+      const a=-Math.PI/2+i*2*Math.PI/n,r=radius*d[key]/100,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;
+      html+=`<circle cx="${x}" cy="${y}" r="3.2" fill="#7f6240"/>`;
+    });
+    svg.innerHTML=html;
   }
   renderRadar();
 
+  setTimeout(()=>{
+    document.querySelectorAll('.visual-meter i,.strategy-meter i').forEach(i=>i.style.width=`${i.dataset.width}%`);
+  },140);
+
+  // 分享卡保留轻量版本。
   document.getElementById('shareType').textContent=p.name;
   document.getElementById('shareTrack').textContent=`${p.track}策略 · ${primary}`;
   document.getElementById('shareLine').textContent=p.tagline;
@@ -310,9 +461,14 @@
   document.getElementById('shareMBar').style.width=`${M}%`;
   document.getElementById('shareFBar').style.width=`${F}%`;
   document.getElementById('shareStrengths').innerHTML=top.slice(0,3).map(([key,value])=>`<span>${DIM_NAMES[key]} ${value}</span>`).join('');
-  document.getElementById('shareBtn').addEventListener('click',()=>{const card=document.getElementById('shareCard');card.classList.add('show');setTimeout(()=>card.classList.add('on'),20);card.scrollIntoView({behavior:'smooth',block:'center'});});
+  document.getElementById('shareBtn').addEventListener('click',()=>{
+    const card=document.getElementById('shareCard');
+    card.classList.add('show');
+    setTimeout(()=>card.classList.add('on'),20);
+    card.scrollIntoView({behavior:'smooth',block:'center'});
+  });
 
-  const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('on');}),{threshold:.06});
+  const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('on');}),{threshold:.05});
   document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
-  setTimeout(()=>document.querySelectorAll('.result-hero,.personality-profile,.radar-layout').forEach(el=>el.classList.add('on')),50);
+  setTimeout(()=>document.querySelectorAll('.result-overview,.quick-read').forEach(el=>el.classList.add('on')),50);
 })();

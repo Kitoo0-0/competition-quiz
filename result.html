@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>测试结果｜竞势</title>
-  <link rel="stylesheet" href="styles.css?v=11">
+  <link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
   <header class="site-header">
@@ -14,89 +14,127 @@
     </div>
   </header>
 
-  <main class="container result-wrap">
-    <section class="result-hero reveal">
-      <div>
-        <div class="eyebrow">你的主要类型</div>
+  <main class="container result-wrap result-v12">
+    <section class="result-overview reveal">
+      <div class="overview-main">
+        <div class="eyebrow">你的结果</div>
         <h1 id="primaryName" class="result-title">资源整合型</h1>
         <p id="primaryTagline" class="result-tagline"></p>
+        <p id="overviewCore" class="overview-core"></p>
         <div class="badges">
           <span id="trackBadge" class="badge"></span>
-          <span id="keywordBadge" class="badge"></span>
           <span id="secondaryBadge" class="badge"></span>
         </div>
+        <p id="secondaryNote" class="secondary-note"></p>
       </div>
-      <div class="score-grid">
-        <div class="score-card"><span>雄竞指数</span><strong id="mScore">0</strong><small>通过能力、结果、位置与资产直接获得资源的倾向</small></div>
-        <div class="score-card"><span>雌竞指数</span><strong id="fScore">0</strong><small>通过吸引、关系、环境与综合价值获得优先选择的倾向</small></div>
-      </div>
-    </section>
 
-    <section class="report-card personality-profile reveal">
-      <div class="section-kicker">01 · 主人格解读</div>
-      <div class="profile-grid">
-        <div>
-          <h2 id="profileTitle">你的人格核心</h2>
-          <p id="profileCore" class="lead-copy"></p>
+      <aside class="axis-panel" aria-label="雄竞与雌竞指数">
+        <div class="axis-head">
+          <span>策略倾向</span>
+          <strong id="axisLabel">—</strong>
         </div>
-        <dl class="definition-list">
-          <div><dt>你更擅长怎么做</dt><dd id="profileWin"></dd></div>
-          <div><dt>最值得积累</dt><dd id="profileStake"></dd></div>
-          <div><dt>和相近类型差在哪</dt><dd id="profileBoundary"></dd></div>
-        </dl>
+        <div class="axis-item">
+          <div class="axis-label"><span>雄竞 · 直接争取</span><strong id="mScore">0</strong></div>
+          <div class="axis-track"><i id="mBar"></i></div>
+        </div>
+        <div class="axis-item">
+          <div class="axis-label"><span>雌竞 · 被选择与借力</span><strong id="fScore">0</strong></div>
+          <div class="axis-track"><i id="fBar"></i></div>
+        </div>
+        <p id="axisSummary" class="axis-summary"></p>
+      </aside>
+    </section>
+
+    <section class="quick-read reveal" aria-label="结果速读">
+      <article><span>最强能力</span><strong id="quickStrength">—</strong><p id="quickStrengthText"></p></article>
+      <article><span>最常用方式</span><strong id="quickStrategy">—</strong><p id="quickStrategyText"></p></article>
+      <article><span>最需留意</span><strong id="quickWatch">—</strong><p id="quickWatchText"></p></article>
+    </section>
+
+    <section class="report-card result-section reveal">
+      <div class="section-kicker">01 · 能力地图</div>
+      <div class="section-heading-row">
+        <div>
+          <h2>你的 7 项底层能力</h2>
+          <p class="section-intro">先看高低差，不需要追求每一项都高。真正有用的是知道自己最顺手的能力，以及哪一项会在关键时刻拖后腿。</p>
+        </div>
+        <div class="legend-note"><span>70+</span> 可直接当优势使用</div>
+      </div>
+      <div class="ability-layout">
+        <div class="radar-panel">
+          <svg id="radar" viewBox="0 0 320 320" aria-label="七维能力雷达图"></svg>
+          <div class="radar-caption"><span id="radarTop"></span><span id="radarBottom"></span></div>
+        </div>
+        <div id="dimensionList" class="dimension-visual-list"></div>
       </div>
     </section>
 
-    <section class="report-card reveal">
-      <div class="section-kicker">02 · 第二人格</div>
-      <div class="secondary-layout">
-        <div><h2 id="secondaryName" class="sub-result-title"></h2><p id="secondaryTagline" class="lead-copy"></p></div>
-        <div><h3>这一面什么时候更明显</h3><p id="secondaryText"></p></div>
+    <section class="report-card result-section reveal">
+      <div class="section-kicker">02 · 竞争方式</div>
+      <div class="section-heading-row">
+        <div>
+          <h2>你通常怎么拿到机会</h2>
+          <p class="section-intro">这 5 项看的是“动作”，不是人格标签。分数越高，说明你越容易自然地使用这种方式。</p>
+        </div>
+      </div>
+      <div id="indexGrid" class="strategy-visual-grid"></div>
+    </section>
+
+    <section class="report-card result-section reveal">
+      <div class="section-kicker">03 · 你的优势</div>
+      <h2>最值得放大的 3 个优势</h2>
+      <div id="strengthCards" class="insight-card-grid"></div>
+    </section>
+
+    <section class="report-card result-section reveal">
+      <div class="section-kicker">04 · 需要留意</div>
+      <h2>最容易拖你后腿的 3 个点</h2>
+      <p class="section-intro">这里看的是相对短板，不是在给你贴“缺点”标签。目标不是把弱项练成强项，而是别让它卡住你的优势。</p>
+      <div id="watchCards" class="insight-card-grid watch-grid"></div>
+    </section>
+
+    <section class="report-card result-section reveal">
+      <div class="section-kicker">05 · 环境匹配</div>
+      <h2>什么环境更容易让你发挥</h2>
+      <div class="environment-grid">
+        <div class="environment-panel fit-panel">
+          <div class="environment-title"><span>更适合</span><strong>在这些环境里，你更容易出成绩</strong></div>
+          <ul id="fitEnvironment"></ul>
+        </div>
+        <div class="environment-panel avoid-panel">
+          <div class="environment-title"><span>容易吃亏</span><strong>这些环境会放大你的短板</strong></div>
+          <ul id="avoidEnvironment"></ul>
+        </div>
       </div>
     </section>
 
-    <section class="report-card radar-layout reveal">
-      <div>
-        <div class="section-kicker">03 · 七维底层能力</div>
-        <svg id="radar" viewBox="0 0 320 320" aria-label="七维能力雷达图"></svg>
+    <section class="report-card result-section reveal">
+      <div class="section-kicker">06 · 职业方向</div>
+      <div class="career-topline">
+        <div>
+          <h2>优先看这些方向</h2>
+          <p id="careerReason" class="section-intro"></p>
+        </div>
+        <div id="careerRoles" class="role-chips"></div>
       </div>
-      <div>
-        <h2>你的能力不是高低排序，而是一套可配置的资源。</h2>
-        <p class="section-intro">七个维度分别回答你在“读人、呈现、关系、做事、争取、判断、借力”上的稳定倾向。分数越高，不代表越优秀，而代表你更容易依赖这项能力解决问题。</p>
-        <div id="dimensionList" class="dimension-list detailed"></div>
+      <div class="career-callout">
+        <span>职业提醒</span>
+        <p id="careerRisk"></p>
       </div>
-    </section>
-
-    <section class="report-card reveal">
-      <div class="section-kicker">04 · 五项竞争方式</div>
-      <h2>你通常通过哪几种方式获得资源与机会？</h2>
-      <p class="section-intro">这五项不是另一套人格，而是把你的竞争动作拆开来看：你会不会正面争、是否容易被优先选择、离开环境后能否独立产出、是否擅长借力，以及你到底有多想往上走。</p>
-      <div id="indexGrid" class="strategy-grid"></div>
-    </section>
-
-    <section class="report-card long-report reveal">
-      <div class="section-kicker">05 · 核心优势分析</div>
-      <h2>先看你最值得放大的部分。</h2>
-      <div id="strengthAnalysis" class="long-copy"></div>
-    </section>
-
-    <section class="report-card long-report reveal">
-      <div class="section-kicker">06 · 致命短板分析</div>
-      <h2>只看最可能拖住你的地方。</h2>
-      <div id="weaknessAnalysis" class="long-copy"></div>
-    </section>
-
-    <section class="report-card reveal">
-      <div class="section-kicker">07 · 职业与发展地图</div>
-      <h2>哪些环境更适合你？</h2>
-      <div id="careerMap" class="career-map"></div>
       <p class="report-note">职业建议只作为能力结构参考，不替代兴趣、经验、收入需求、行业门槛与现实机会。</p>
     </section>
 
-    <section class="report-card reveal">
-      <div class="section-kicker">08 · 最值得积累的5项资产</div>
-      <h2>把优势变成真正能带走的资产。</h2>
-      <div id="assetList" class="asset-list"></div>
+    <section class="report-card result-section reveal">
+      <div class="section-kicker">07 · 个人资产</div>
+      <h2>最值得积累的 5 项资产</h2>
+      <p class="section-intro">能力会波动，资产会留下。优先把你已经擅长的东西，变成能长期带走、反复使用的筹码。</p>
+      <div id="assetList" class="asset-visual-list"></div>
+    </section>
+
+    <section class="report-card result-section reveal">
+      <div class="section-kicker">08 · 下一步</div>
+      <h2>未来 90 天，只做 3 件事</h2>
+      <div id="actionTimeline" class="action-timeline"></div>
     </section>
 
     <section id="shareCard" class="share-card reveal">
@@ -135,7 +173,7 @@
           </div>
 
           <div class="share-footer">
-            <span>看见你真正习惯的竞争方式</span>
+            <span>看清你的优势与竞争方式</span>
             <span>PERSONAL STRATEGY REPORT</span>
           </div>
         </div>
@@ -144,6 +182,6 @@
   </main>
 
   <script src="js/questions.js"></script>
-  <script src="js/result.js?v=11"></script>
+  <script src="js/result.js?v=12"></script>
 </body>
 </html>
