@@ -316,16 +316,9 @@
   },120);
 
   const [top1,top2,top3]=top.slice(0,3);
-  const [low1,low2]=bottom.slice(0,2);
+  const [low1,low2,low3]=bottom.slice(0,3);
   const strongIndex=strongestIndex();
   const weakIndex=weakestIndex();
-
-  document.getElementById('quickStrength').textContent=`${DIM_NAMES[top1[0]]} ${top1[1]}`;
-  document.getElementById('quickStrengthText').textContent=DIM_BRIEF[top1[0]];
-  document.getElementById('quickStrategy').textContent=`${INDEXES[strongIndex[0]].name} ${strongIndex[1]}`;
-  document.getElementById('quickStrategyText').textContent=STRATEGY_BRIEF[strongIndex[0]];
-  document.getElementById('quickWatch').textContent=`${DIM_NAMES[low1[0]]} ${low1[1]}`;
-  document.getElementById('quickWatchText').textContent=DIM_RISK[low1[0]];
 
   // 七维能力：雷达看结构，横条看具体分数。
   const dimList=document.getElementById('dimensionList');
@@ -346,16 +339,15 @@
   document.getElementById('radarTop').textContent=`最强：${DIM_NAMES[top1[0]]} ${top1[1]}`;
   document.getElementById('radarBottom').textContent=`相对最低：${DIM_NAMES[low1[0]]} ${low1[1]}`;
 
-  // 五项竞争方式：每张卡只保留“是什么 + 你的水平”。
+  // 五项竞争方式缩成“竞争风格”补充模块，不再与七维能力同级展示。
   const indexGrid=document.getElementById('indexGrid');
   Object.entries(indexes).forEach(([key,value])=>{
     const div=document.createElement('article');
-    div.className='strategy-visual-card';
+    div.className='strategy-compact-item';
     div.innerHTML=`
-      <div class="strategy-visual-top"><span>${INDEXES[key].name}</span><strong>${value}</strong></div>
-      <div class="strategy-level">${indexBand(value)}</div>
-      <p>${STRATEGY_BRIEF[key]}</p>
-      <div class="strategy-meter"><i data-width="${value}"></i></div>`;
+      <div class="strategy-compact-head"><span>${INDEXES[key].name}</span><strong>${value}</strong></div>
+      <div class="strategy-compact-meter"><i data-width="${value}"></i></div>
+      <small>${indexBand(value)}</small>`;
     indexGrid.appendChild(div);
   });
 
@@ -372,13 +364,11 @@
     strengthCards.appendChild(card);
   });
 
-  // 两个相对弱维度 + 一个最弱竞争动作，避免长篇“致命短板”。
+  // 三个相对较弱的底层能力，避免再用竞争方式重复解释同一件事。
   const watchCards=document.getElementById('watchCards');
-  const watchItems=[
-    {name:DIM_NAMES[low1[0]],score:low1[1],text:DIM_RISK[low1[0]],fix:DIM_FIX[low1[0]]},
-    {name:DIM_NAMES[low2[0]],score:low2[1],text:DIM_RISK[low2[0]],fix:DIM_FIX[low2[0]]},
-    {name:INDEXES[weakIndex[0]].name,score:weakIndex[1],text:STRATEGY_RISK[weakIndex[0]],fix:STRATEGY_FIX[weakIndex[0]]}
-  ];
+  const watchItems=[low1,low2,low3].map(([key,score])=>({
+    name:DIM_NAMES[key], score, text:DIM_RISK[key], fix:DIM_FIX[key]
+  }));
   watchItems.forEach((item,i)=>{
     const card=document.createElement('article');
     card.className='insight-card watch-card';
@@ -390,29 +380,12 @@
     watchCards.appendChild(card);
   });
 
-  // 环境匹配。
+  // 环境匹配，同时把发展方向收进同一模块。
   const env=ENVIRONMENTS[primary] || ENVIRONMENTS.D01;
+  const c=CAREER[primary];
   document.getElementById('fitEnvironment').innerHTML=env.fit.map(x=>`<li>${x}</li>`).join('');
   document.getElementById('avoidEnvironment').innerHTML=env.avoid.map(x=>`<li>${x}</li>`).join('');
-
-  // 职业方向：只留原因、角色和一个风险提醒。
-  const c=CAREER[primary];
-  document.getElementById('careerReason').textContent=firstSentences(c.logic,2);
   document.getElementById('careerRoles').innerHTML=c.roles.slice(0,6).map(x=>`<span>${x}</span>`).join('');
-  document.getElementById('careerRisk').textContent=firstSentences(c.risk,2);
-
-  // 资产：一句解释 + 一个动作。
-  const selectedAssets=assetSelection();
-  const assetList=document.getElementById('assetList');
-  selectedAssets.forEach((name,i)=>{
-    const x=ASSET_DETAILS[name];
-    const el=document.createElement('article');
-    el.className='asset-visual-item';
-    el.innerHTML=`
-      <div class="asset-rank">${String(i+1).padStart(2,'0')}</div>
-      <div class="asset-body"><h3>${name}</h3><p>${firstSentences(x.why,1)}</p><small>${firstSentences(x.how,1)}</small></div>`;
-    assetList.appendChild(el);
-  });
 
   // 90天：不再写长计划，只给三个可执行动作。
   const actionTimeline=document.getElementById('actionTimeline');
@@ -449,7 +422,7 @@
   renderRadar();
 
   setTimeout(()=>{
-    document.querySelectorAll('.visual-meter i,.strategy-meter i').forEach(i=>i.style.width=`${i.dataset.width}%`);
+    document.querySelectorAll('.visual-meter i,.strategy-compact-meter i').forEach(i=>i.style.width=`${i.dataset.width}%`);
   },140);
 
   // 分享卡保留轻量版本。
@@ -470,5 +443,5 @@
 
   const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('on');}),{threshold:.05});
   document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
-  setTimeout(()=>document.querySelectorAll('.result-overview,.quick-read').forEach(el=>el.classList.add('on')),50);
+  setTimeout(()=>document.querySelectorAll('.result-overview').forEach(el=>el.classList.add('on')),50);
 })();
