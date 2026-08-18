@@ -287,9 +287,6 @@
     D01:{fit:['时间和节奏有自主权','收入稳定、边界清楚','结果够用即可，不强迫无止境升级'],avoid:['长期高强度排名竞争','为了身份持续牺牲生活','不争取就会失去基本选择权']}
   };
 
-  function strongestIndex(){ return Object.entries(indexes).sort((a,b)=>b[1]-a[1])[0]; }
-  function weakestIndex(){ return Object.entries(indexes).sort((a,b)=>a[1]-b[1])[0]; }
-
   function assetSelection(){
     const assetAdd={E:'情绪边界',A:'个人形象',S:'高质量弱关系',W:'可迁移技能',C:'行业信用',R:'高价值信息源',L:'渠道资产'};
     const arr=[...(BASE_ASSETS[primary]||[])];
@@ -335,8 +332,6 @@
 
   const [top1,top2,top3]=top.slice(0,3);
   const [low1,low2,low3]=bottom.slice(0,3);
-  const strongIndex=strongestIndex();
-  const weakIndex=weakestIndex();
 
   // 七维能力：雷达看结构，横条看具体分数。
   const dimList=document.getElementById('dimensionList');
@@ -348,26 +343,14 @@
     row.innerHTML=`
       <div class="dimension-visual-head">
         <div><strong>${info.name}</strong><span>${DIM_BRIEF[key]}</span></div>
-        <div class="dimension-score"><b>${value}</b><em>${band(value)}</em></div>
+        <div class="dimension-score"><em class="dimension-band">${band(value)}</em></div>
       </div>
       <div class="visual-meter"><i data-width="${value}"></i></div>
       <p>${result}</p>`;
     dimList.appendChild(row);
   });
-  document.getElementById('radarTop').textContent=`最强：${DIM_NAMES[top1[0]]} ${top1[1]}`;
-  document.getElementById('radarBottom').textContent=`相对最低：${DIM_NAMES[low1[0]]} ${low1[1]}`;
-
-  // 五项竞争方式缩成“竞争风格”补充模块，不再与七维能力同级展示。
-  const indexGrid=document.getElementById('indexGrid');
-  Object.entries(indexes).forEach(([key,value])=>{
-    const div=document.createElement('article');
-    div.className='strategy-compact-item';
-    div.innerHTML=`
-      <div class="strategy-compact-head"><span>${INDEXES[key].name}</span><strong>${value}</strong></div>
-      <div class="strategy-compact-meter"><i data-width="${value}"></i></div>
-      <small>${indexBand(value)}</small>`;
-    indexGrid.appendChild(div);
-  });
+  document.getElementById('radarTop').textContent=`最强：${DIM_NAMES[top1[0]]} · ${band(top1[1])}`;
+  document.getElementById('radarBottom').textContent=`相对最低：${DIM_NAMES[low1[0]]} · ${band(low1[1])}`;
 
   // 三个优势：结论 / 为什么有用 / 怎么使用。
   const strengthCards=document.getElementById('strengthCards');
@@ -376,7 +359,7 @@
     card.className='insight-card';
     card.innerHTML=`
       <div class="insight-number">0${i+1}</div>
-      <div class="insight-title-row"><h3>${DIM_NAMES[key]}</h3><strong>${value}</strong></div>
+      <div class="insight-title-row"><h3>${DIM_NAMES[key]}</h3><span class="insight-level">${band(value)}</span></div>
       <p>${DIM_USE[key]}</p>
       <div class="insight-action"><span>怎么用</span>${DIM_FIX[key].replace('不要只听表面回答。','')}</div>`;
     strengthCards.appendChild(card);
@@ -392,7 +375,7 @@
     card.className='insight-card watch-card';
     card.innerHTML=`
       <div class="insight-number">0${i+1}</div>
-      <div class="insight-title-row"><h3>${item.name}</h3><strong>${item.score}</strong></div>
+      <div class="insight-title-row"><h3>${item.name}</h3><span class="insight-level">${band(item.score)}</span></div>
       <p>${item.text}</p>
       <div class="insight-action"><span>最低保护</span>${item.fix}</div>`;
     watchCards.appendChild(card);
@@ -440,7 +423,7 @@
   renderRadar();
 
   setTimeout(()=>{
-    document.querySelectorAll('.visual-meter i,.strategy-compact-meter i').forEach(i=>i.style.width=`${i.dataset.width}%`);
+    document.querySelectorAll('.visual-meter i').forEach(i=>i.style.width=`${i.dataset.width}%`);
   },140);
 
   // 分享卡保留轻量版本。
@@ -451,7 +434,7 @@
   document.getElementById('shareFScore').textContent=F;
   document.getElementById('shareMBar').style.width=`${M}%`;
   document.getElementById('shareFBar').style.width=`${F}%`;
-  document.getElementById('shareStrengths').innerHTML=top.slice(0,3).map(([key,value])=>`<span>${DIM_NAMES[key]} ${value}</span>`).join('');
+  document.getElementById('shareStrengths').innerHTML=top.slice(0,3).map(([key,value])=>`<span>${DIM_NAMES[key]} · ${band(value)}</span>`).join('');
   document.getElementById('shareBtn').addEventListener('click',()=>{
     const card=document.getElementById('shareCard');
     card.classList.add('show');
