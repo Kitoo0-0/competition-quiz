@@ -1,12 +1,12 @@
 (() => {
   const Q = window.QUIZ_QUESTIONS;
-  const DIM_NAMES = {E:'情绪洞察',A:'外貌呈现',S:'社交资本',W:'工作执行',C:'竞争野心',R:'战略认知',L:'资源杠杆'};
+  const DIM_NAMES = {E:'情绪洞察',A:'形象呈现',S:'社交资本',W:'执行落地',C:'竞争野心',R:'战略认知',L:'资源杠杆'};
 
   const DIMENSIONS = {
     E:{name:'情绪洞察',short:'读人',meaning:'你识别情绪变化、真实需求、关系氛围与未说出口信息的能力。它测的不是“善不善良”，而是你能否在语言之外读取人的状态和动机。',high:'高分时，你更容易提前发现关系变化、理解他人真实顾虑，并在谈判、管理、亲密关系或社交中调整沟通方式。',low:'低分时，你更依赖明确表达和事实信息，优势是直接、少猜测；风险是在复杂关系中较晚发现情绪和立场已经变化。'},
-    A:{name:'外貌呈现',short:'呈现',meaning:'你管理第一印象、个人形象、场合适配与价值展示的能力。它不等于长相，而是“别人能否快速看懂你的优势”。',high:'高分时，你知道不同场景应该如何呈现自己，也更愿意把形象、表达和包装当作价值的一部分。',low:'低分时，你更相信实力本身，通常不愿把太多精力花在包装上；风险是真实价值高于别人第一眼能感知到的价值。'},
+    A:{name:'形象呈现',short:'呈现',meaning:'你管理第一印象、个人形象、场合适配与价值展示的能力。它不等于长相，而是“别人能否快速看懂你的优势”。',high:'高分时，你知道不同场景应该如何呈现自己，也更愿意把形象、表达和包装当作价值的一部分。',low:'低分时，你更相信实力本身，通常不愿把太多精力花在包装上；风险是真实价值高于别人第一眼能感知到的价值。'},
     S:{name:'社交资本',short:'关系',meaning:'你建立、维护并调用高质量关系的能力。它测的不是外向程度，而是你能否把人与人之间的信任、推荐和信息连接沉淀成长期网络。',high:'高分时，你更容易识别值得长期联系的人，也懂得主动维护、连接双方价值并在需要时找到合适的人。',low:'低分时，你更偏向独立解决问题，关系成本较低；风险是错过那些不会公开发布、主要依赖信任和推荐流动的机会。'},
-    W:{name:'工作执行',short:'做事',meaning:'你把目标变成结果、在缺少监督时持续推进，并在压力下完成交付的能力。它不等于忙碌，而是稳定产生可验证成果。',high:'高分时，你不容易长期停留在想法阶段，别人也更容易把重要任务交给你。',low:'低分时，你的表现更依赖兴趣、即时反馈或环境推动；风险是认知和机会跑在现实成果前面。'},
+    W:{name:'执行落地',short:'做事',meaning:'你把目标变成结果、在缺少监督时持续推进，并在压力下完成交付的能力。它不等于忙碌，而是稳定产生可验证成果。',high:'高分时，你不容易长期停留在想法阶段，别人也更容易把重要任务交给你。',low:'低分时，你的表现更依赖兴趣、即时反馈或环境推动；风险是认知和机会跑在现实成果前面。'},
     C:{name:'竞争野心',short:'争取',meaning:'你主动争取更高收入、位置、影响力和稀缺机会的驱动力。它不等于攻击性，而是你是否愿意为“更高一层”承担竞争和不确定性。',high:'高分时，你更容易被排名、机会和上升空间激发，也不太愿意长期停留在“还可以”的位置。',low:'低分时，你更重视稳定、体验或自由，不会自动把人生理解成排行榜；需要确认这是主动选择，而不是回避竞争。'},
     R:{name:'战略认知',short:'判断',meaning:'你看长期、看利益结构、识别机会成本和关键变量的能力。它测的是“看懂局”的倾向，而不是知识量或智商。',high:'高分时，你更习惯分析规则背后的规则、判断谁真正获益，并把短期选择放到更长期的框架里。',low:'低分时，你更容易根据眼前结果、熟悉经验或周围人的判断行动；重大决策时需要更多结构化复盘。'},
     L:{name:'资源杠杆',short:'借力',meaning:'你利用平台、人脉、工具、资本、合作和信息放大个人能力的倾向。它不等于依赖别人，而是是否理解“所有事情自己做”并不是唯一的能力证明。',high:'高分时，你更容易寻找合作、平台与资源组合，用更少的时间换取更大结果。',low:'低分时，你偏向单兵作战，独立性强；风险是个人时间逐渐成为整个增长系统的天花板。'}
@@ -112,14 +112,14 @@
 
   let answers = {};
   try { answers = JSON.parse(localStorage.getItem('competition_quiz_answers') || '{}'); } catch (_) {}
-  if (Object.keys(answers).length < 72) {
+  if (Object.keys(answers).length < Q.length) {
     // 直接打开结果页时使用一组只用于UI预览的示例答案。
     answers = {};
     Q.forEach(q => {
       if (q.type === 'binary') {
         const m=q.mOption || 'A', f=m==='A'?'B':'A';
-        answers[q.id] = [57,60,64,68].includes(q.id) ? m : f;
-      } else if (q.id <= 56) {
+        answers[q.id] = q.id % 2 === 0 ? m : f;
+      } else if (!(q.dimension || '').startsWith('K')) {
         const scored=['E','S','R','L'].includes(q.dimension) ? 5 : 3;
         answers[q.id] = q.reverse ? 6-scored : scored;
       } else {
@@ -130,9 +130,9 @@
 
   function round(v){ return Math.max(0, Math.min(100, Math.round(v))); }
   function dimScore(dim){
-    const items=Q.filter(q=>q.dimension===dim && q.id<=56); let sum=0;
+    const items=Q.filter(q=>q.dimension===dim); let sum=0;
     items.forEach(q=>{ let v=Number(answers[q.id]||3); if(q.reverse)v=6-v; sum+=v; });
-    return round(((sum-8)/32)*100);
+    const n=items.length || 1; return round(((sum-n)/(n*4))*100);
   }
   const d={}; ['E','A','S','W','C','R','L'].forEach(k=>d[k]=dimScore(k));
   const binary=Q.filter(q=>q.type==='binary');
@@ -146,21 +146,21 @@
   const MCapacity=d.W*.27+d.C*.24+d.R*.22+d.L*.17+d.S*.10;
   const FCapacity=d.E*.24+d.A*.24+d.S*.22+d.L*.18+d.R*.12;
   const M=round(MCapacity*.55+MChoice*.45), F=round(FCapacity*.55+FChoice*.45);
-  const k={}; [69,70,71,72].forEach(id=>k[`K${id}`]=(Number(answers[id]||3)-1)*25);
+  const k={}; [45,46,47,48].forEach(id=>k[`K${id}`]=(Number(answers[id]||3)-1)*25);
   const indexes={
-    D:round(d.C*.35+d.W*.20+d.R*.10+MChoice*.25+k.K69*.10),
+    D:round(d.C*.35+d.W*.20+d.R*.10+MChoice*.25+k.K45*.10),
     T:round(d.A*.25+d.E*.20+d.S*.20+FChoice*.25+d.L*.10),
-    I:round(d.W*.30+d.R*.20+d.C*.15+MChoice*.15+k.K69*.20),
-    G:round(d.L*.35+d.S*.20+d.R*.10+FChoice*.10+k.K72*.25),
-    U:round(d.C*.50+d.R*.10+k.K70*.15+Math.max(MChoice,FChoice)*.25)
+    I:round(d.W*.30+d.R*.20+d.C*.15+MChoice*.15+k.K45*.20),
+    G:round(d.L*.35+d.S*.20+d.R*.10+FChoice*.10+k.K48*.25),
+    U:round(d.C*.50+d.R*.10+k.K46*.15+Math.max(MChoice,FChoice)*.25)
   };
 
   // 人格得分在保留原始结构的基础上，加大关键维度权重，降低相邻类型重叠。
   const scores={
     A01:round(M*.14+d.W*.18+d.C*.18+d.E*.08+d.S*.16+d.R*.12+d.L*.08+indexes.D*.06),
-    A02:round(M*.14+d.W*.28+d.R*.27+d.C*.10+d.S*.04+d.L*.05+(k.K69>=75?2:0)),
+    A02:round(M*.14+d.W*.28+d.R*.27+d.C*.10+d.S*.04+d.L*.05+(k.K45>=75?2:0)),
     A03:round(M*.12+d.S*.18+d.E*.14+d.C*.18+d.L*.15+d.W*.10+indexes.D*.13),
-    A04:round(M*.12+d.C*.22+d.L*.16+d.W*.18+d.R*.14+d.S*.06+indexes.U*.12+(k.K69>=75&&k.K72>=75?2:0)),
+    A04:round(M*.12+d.C*.22+d.L*.16+d.W*.18+d.R*.14+d.S*.06+indexes.U*.12+(k.K45>=75&&k.K48>=75?2:0)),
     A05:round(M*.12+d.R*.32+d.L*.23+d.C*.08+d.W*.07+indexes.G*.08+indexes.I*.10),
     A06:round(M*.10+d.A*.13+d.S*.11+d.E*.11+d.W*.22+d.R*.14+indexes.I*.12+d.L*.07),
     B01:round(F*.15+d.E*.27+d.S*.13+d.A*.10+d.R*.11+d.W*.12+(100-indexes.U)*.12),
@@ -169,9 +169,9 @@
     B04:round(F*.13+d.R*.27+d.E*.25+d.S*.11+d.W*.10+d.A*.05+indexes.I*.09),
     B05:round(F*.13+d.S*.21+d.L*.20+d.E*.22+d.R*.08+d.W*.09+indexes.G*.07),
     B06:round(F*.12+d.S*.22+d.L*.21+d.A*.11+d.R*.16+d.C*.09+indexes.U*.09),
-    C01:round(M*.10+F*.10+d.C*.15+d.W*.15+d.S*.11+d.E*.09+d.A*.07+d.L*.08+indexes.D*.08+indexes.T*.07),
-    C02:round(M*.08+F*.08+d.L*.28+d.S*.24+d.R*.16+d.E*.07+indexes.G*.09),
-    C03:round(M*.08+F*.08+d.A*.22+d.S*.15+d.E*.13+d.W*.16+d.R*.09+indexes.T*.09)
+    C01:round(M*.10+F*.10+d.C*.15+d.W*.15+d.S*.11+d.E*.09+d.A*.07+d.L*.08+indexes.D*.08+indexes.T*.07+(k.K47>=75?2:0)),
+    C02:round(M*.08+F*.08+d.L*.28+d.S*.24+d.R*.16+d.E*.07+indexes.G*.09+(k.K47>=75?2:0)),
+    C03:round(M*.08+F*.08+d.A*.22+d.S*.15+d.E*.13+d.W*.16+d.R*.09+indexes.T*.09+(k.K47>=75?2:0))
   };
 
   let pool;

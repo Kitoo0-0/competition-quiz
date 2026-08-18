@@ -1,7 +1,7 @@
 (() => {
   const questions = window.QUIZ_QUESTIONS;
   const scaleLabels = ['非常不符合','比较不符合','一般','比较符合','非常符合'];
-  const QUIZ_SCHEMA_VERSION = 'v8';
+  const QUIZ_SCHEMA_VERSION = 'v13-48';
 
   // 题目不展示测量维度，减少受试者按“想得到的类型”作答。
   if (localStorage.getItem('competition_quiz_schema') !== QUIZ_SCHEMA_VERSION) {
@@ -41,11 +41,11 @@
 
   function render() {
     const q = questions[index];
-    count.textContent = `${String(index + 1).padStart(2,'0')} / 72`;
-    bar.style.width = `${((index + 1) / 72) * 100}%`;
+    count.textContent = `${String(index + 1).padStart(2,'0')} / ${questions.length}`;
+    bar.style.width = `${((index + 1) / questions.length) * 100}%`;
     meta.textContent = q.type === 'binary'
       ? '情境选择 · 选更接近你的反应'
-      : (q.id <= 56 ? '行为判断 · 按真实习惯作答' : '补充判断 · 按第一反应作答');
+      : (q.dimension && q.dimension.startsWith('K') ? '补充判断 · 按第一反应作答' : '行为判断 · 按真实习惯作答');
     title.textContent = q.text;
     answersEl.innerHTML = '';
 
