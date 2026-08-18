@@ -12,7 +12,7 @@ window.QUIZ_QUESTIONS = [
   {id:9,dimension:'A',type:'scale',reverse:true,text:'只要内容本身没问题，我通常不会太在意头像、公开主页、作品展示或个人形象是不是已经过时。'},
   {id:10,dimension:'S',type:'scale',text:'认识一个聊得来或以后可能互相帮助的人后，我通常不会完全等对方再次联系我。'},
   {id:11,dimension:'W',type:'scale',reverse:true,text:'如果一件重要的事没有明确截止日期，我很容易一直往后拖。'},
-  {id:12,dimension:'C',type:'scale',text:'两个选择眼下差不多时，我会明显在意哪个能让我未来拥有更多选择。'},
+  {id:12,dimension:'C',type:'scale',reverse:true,text:'两个选择眼下差不多时，我通常更容易先看眼前哪个更舒服，很少继续想哪个会让我未来拥有更多选择。'},
   {id:13,dimension:'R',type:'scale',reverse:true,text:'当身边大多数我信任的人都看好一个机会时，我通常不会再花很多时间建立自己的判断。'},
   {id:14,dimension:'L',type:'scale',reverse:true,text:'遇到需要合作的事情时，我常觉得沟通太麻烦，自己做反而更省事。'},
 
@@ -24,12 +24,12 @@ window.QUIZ_QUESTIONS = [
   {id:20,dimension:'R',type:'scale',text:'看到别人很成功时，我更想知道他的起点、时机和关键条件，而不是直接照着他的做法学。'},
   {id:21,dimension:'L',type:'scale',text:'如果一个工具、课程、服务或合作能稳定节省大量时间，只要回报合理，我愿意用资源换效率。'},
 
-  {id:22,dimension:'E',type:'scale',text:'同一句话面对不同的人，我会自然调整说法，因为我会在意对方怎样理解。'},
+  {id:22,dimension:'E',type:'scale',reverse:true,text:'同一句话面对不同的人，我通常不会特意调整说法；把意思讲清楚对我来说更重要。'},
   {id:23,dimension:'A',type:'scale',reverse:true,text:'我很少思考别人第一眼会怎样感受我，也不太会为了不同场合调整自己的呈现。'},
   {id:24,dimension:'S',type:'scale',text:'遇到一个自己解决起来很慢的问题时，我脑子里通常能想到几位“也许可以问一下”的人。'},
   {id:25,dimension:'W',type:'scale',reverse:true,text:'我经常会对新想法很兴奋，但真正做到可以交付、展示或完成的比例没有那么高。'},
   {id:26,dimension:'C',type:'scale',text:'如果我确认当前环境已经很难让我继续成长，我会认真准备进入下一个阶段，而不是一直停着。'},
-  {id:27,dimension:'R',type:'scale',text:'面对一个看起来不错的选择，我通常也会想：选了它以后，我会失去哪些时间和其他可能性？'},
+  {id:27,dimension:'R',type:'scale',reverse:true,text:'面对一个看起来不错的选择，我通常先看它能带来什么，不太会认真计算因此放弃了哪些其他可能性。'},
   {id:28,dimension:'L',type:'scale',text:'如果两个人合作明显比各自单独做更好，我愿意重新讨论分工、回报和合作方式。'},
 
   {id:29,dimension:'E',type:'scale',text:'需要说一件可能让人不舒服的事时，我会考虑什么时候说、怎么说，而不只考虑内容对不对。'},

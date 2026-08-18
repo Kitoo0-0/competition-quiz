@@ -1,7 +1,7 @@
 (() => {
   const questions = window.QUIZ_QUESTIONS;
   const scaleLabels = ['非常不符合','比较不符合','一般','比较符合','非常符合'];
-  const QUIZ_SCHEMA_VERSION = 'v13-48';
+  const QUIZ_SCHEMA_VERSION = 'v16-48';
 
   // 题目不展示测量维度，减少受试者按“想得到的类型”作答。
   if (localStorage.getItem('competition_quiz_schema') !== QUIZ_SCHEMA_VERSION) {

@@ -112,20 +112,36 @@
 
   let answers = {};
   try { answers = JSON.parse(localStorage.getItem('competition_quiz_answers') || '{}'); } catch (_) {}
-  if (Object.keys(answers).length < Q.length) {
-    // 直接打开结果页时使用一组只用于UI预览的示例答案。
-    answers = {};
-    Q.forEach(q => {
-      if (q.type === 'binary') {
-        const m=q.mOption || 'A', f=m==='A'?'B':'A';
-        answers[q.id] = q.id % 2 === 0 ? m : f;
-      } else if (!(q.dimension || '').startsWith('K')) {
-        const scored=['E','S','R','L'].includes(q.dimension) ? 5 : 3;
-        answers[q.id] = q.reverse ? 6-scored : scored;
-      } else {
-        answers[q.id] = 4;
-      }
-    });
+
+  // 正式测试版：结果只能来自真实完成的48道回答，绝不再自动生成演示答案。
+  function isValidAnswer(q, value) {
+    if (q.type === 'binary') return value === 'A' || value === 'B';
+    const n = Number(value);
+    return Number.isInteger(n) && n >= 1 && n <= 5;
+  }
+  const answeredCount = Q.filter(q => Object.prototype.hasOwnProperty.call(answers, q.id) && isValidAnswer(q, answers[q.id])).length;
+  const schemaOK = localStorage.getItem('competition_quiz_schema') === 'v16-48';
+  const completedOK = localStorage.getItem('competition_quiz_completed') === '1';
+  const hasCompleteAnswers = schemaOK && completedOK && answeredCount === Q.length;
+
+  if (!hasCompleteAnswers) {
+    const main = document.querySelector('main');
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) shareBtn.style.display = 'none';
+    if (main) {
+      main.innerHTML = `
+        <section class="report-card incomplete-result-card on">
+          <div class="section-kicker">RESULT NOT READY</div>
+          <h1>还不能生成结果</h1>
+          <p>当前浏览器里只有 <strong>${answeredCount}</strong> / ${Q.length} 道有效回答。为了避免生成假的人格结果，请先完成全部题目。</p>
+          <div class="incomplete-result-actions">
+            <a class="btn btn-primary" href="quiz.html">继续完成测试</a>
+            <a class="btn btn-secondary" href="index.html">返回首页</a>
+          </div>
+          <p class="report-note">如果你刚刚更新过测试版本，旧版答题记录可能已失效，需要重新开始一次48题测试。</p>
+        </section>`;
+    }
+    return;
   }
 
   function round(v){ return Math.max(0, Math.min(100, Math.round(v))); }
@@ -145,7 +161,8 @@
   const MChoice=mWeight/totalWeight*100, FChoice=100-MChoice;
   const MCapacity=d.W*.27+d.C*.24+d.R*.22+d.L*.17+d.S*.10;
   const FCapacity=d.E*.24+d.A*.24+d.S*.22+d.L*.18+d.R*.12;
-  const M=round(MCapacity*.55+MChoice*.45), F=round(FCapacity*.55+FChoice*.45);
+  // 48题版只有9道强制选择题：能力结构占70%，强制选择占30%，避免单道二选一过度左右总路线。
+  const M=round(MCapacity*.70+MChoice*.30), F=round(FCapacity*.70+FChoice*.30);
   const k={}; [45,46,47,48].forEach(id=>k[`K${id}`]=(Number(answers[id]||3)-1)*25);
   const indexes={
     D:round(d.C*.35+d.W*.20+d.R*.10+MChoice*.25+k.K45*.10),
@@ -158,7 +175,7 @@
   // 人格得分在保留原始结构的基础上，加大关键维度权重，降低相邻类型重叠。
   const scores={
     A01:round(M*.14+d.W*.18+d.C*.18+d.E*.08+d.S*.16+d.R*.12+d.L*.08+indexes.D*.06),
-    A02:round(M*.14+d.W*.28+d.R*.27+d.C*.10+d.S*.04+d.L*.05+(k.K45>=75?2:0)),
+    A02:round(M*.14+d.W*.28+d.R*.27+d.C*.10+d.S*.04+d.L*.05+indexes.I*.12+(k.K45>=75?2:0)),
     A03:round(M*.12+d.S*.18+d.E*.14+d.C*.18+d.L*.15+d.W*.10+indexes.D*.13),
     A04:round(M*.12+d.C*.22+d.L*.16+d.W*.18+d.R*.14+d.S*.06+indexes.U*.12+(k.K45>=75&&k.K48>=75?2:0)),
     A05:round(M*.12+d.R*.32+d.L*.23+d.C*.08+d.W*.07+indexes.G*.08+indexes.I*.10),
@@ -176,7 +193,8 @@
 
   let pool;
   if(d.C<42 && M<58 && F<58) pool=['D01'];
-  else if(M>=70 && F>=70 && Math.abs(M-F)<=12) pool=['C01','C02','C03'];
+  else if(M>=65 && F>=65 && Math.abs(M-F)<=12) pool=['C01','C02','C03'];
+  else if(Math.abs(M-F)<=12) pool=['A01','A02','A03','A04','A05','A06','B01','B02','B03','B04','B05','B06'];
   else pool=M>F?['A01','A02','A03','A04','A05','A06']:['B01','B02','B03','B04','B05','B06'];
   const primary=pool.length===1?pool[0]:[...pool].sort((a,b)=>scores[b]-scores[a])[0];
   const secondCandidates=Object.keys(PERSONALITIES).filter(x=>x!==primary && x!=='D01');
