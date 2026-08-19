@@ -247,12 +247,33 @@
   const secondCandidates=Object.keys(PERSONALITIES).filter(x=>x!==primary && x!=='D01');
   const secondary=secondCandidates.sort((a,b)=>(scores[b]||0)-(scores[a]||0))[0];
   const p=PERSONALITIES[primary], s=PERSONALITIES[secondary];
-  document.body.classList.add(`result-theme-${primary.charAt(0).toLowerCase()}`);
+  const RESULT_THEMES={
+    A01:{soft:'#dce4e9',accent:'#6d7f8b'},
+    A02:{soft:'#e1e5e8',accent:'#78838b'},
+    A03:{soft:'#dbe6e4',accent:'#6e8581'},
+    A04:{soft:'#e0e1e8',accent:'#787d8f'},
+    A05:{soft:'#e5e1dc',accent:'#82786e'},
+    A06:{soft:'#dce6e9',accent:'#6f838c'},
+    B01:{soft:'#eadfe2',accent:'#987980'},
+    B02:{soft:'#e6e1e9',accent:'#897d91'},
+    B03:{soft:'#eadfda',accent:'#9a7a73'},
+    B04:{soft:'#e4e2e9',accent:'#817d90'},
+    B05:{soft:'#e8e0dd',accent:'#907c75'},
+    B06:{soft:'#e8dfe4',accent:'#8c7884'},
+    C01:{soft:'#dce6df',accent:'#71867a'},
+    C02:{soft:'#dbe7e3',accent:'#6e847d'},
+    C03:{soft:'#dce7e8',accent:'#6c8388'},
+    D01:{soft:'#e4e2e8',accent:'#7f7a89'}
+  };
+  const resultTheme=RESULT_THEMES[primary]||RESULT_THEMES.D01;
+  document.body.classList.add('result-theme-personality');
+  document.body.style.setProperty('--theme-soft',resultTheme.soft);
+  document.body.style.setProperty('--theme-accent',resultTheme.accent);
   const top=Object.entries(d).sort((a,b)=>b[1]-a[1]);
   const bottom=[...top].reverse();
 
-  function band(v){ if(v>=85)return '很强'; if(v>=70)return '较强'; if(v>=45)return '中等'; if(v>=30)return '偏弱'; return '较弱'; }
-  function indexBand(v){ if(v>=80)return '很强'; if(v>=60)return '较强'; if(v>=40)return '中等'; return '较弱'; }
+  function band(v){ if(v>=70)return '较强'; if(v>=45)return '中等'; return '较弱'; }
+  function indexBand(v){ if(v>=60)return '较强'; if(v>=40)return '中等'; return '较弱'; }
   function firstSentences(text,count=1){
     const parts=String(text||'').match(/[^。！？]+[。！？]?/g) || [String(text||'')];
     return parts.slice(0,count).join('').trim();
@@ -387,7 +408,7 @@
     const value=d[key], info=DIMENSIONS[key];
     const row=document.createElement('article');
     row.className=`dimension-visual-row dim-${key.toLowerCase()}`;
-    const result=value>=70?`这项是你的${value>=85?'明显':'稳定'}优势。`:value<45?'这项目前更容易成为卡点。':'这项处在中间区，会随场景变化。';
+    const result=value>=70?'较强：这项能力更容易稳定使用，是你的优势之一。':value<45?'较弱：这项能力较少成为你的默认选择，关键场景要更主动补上。':'中等：这项能力会随场景变化，不一定每次都自然发挥。';
     row.innerHTML=`
       <div class="dimension-visual-head">
         <div><strong>${info.name}</strong><span>${DIM_BRIEF[key]}</span></div>
@@ -398,7 +419,7 @@
     dimList.appendChild(row);
   });
   document.getElementById('radarTop').textContent=`最强：${DIM_NAMES[top1[0]]} · ${band(top1[1])}`;
-  document.getElementById('radarBottom').textContent=`相对最低：${DIM_NAMES[low1[0]]} · ${band(low1[1])}`;
+  document.getElementById('radarBottom').textContent=`最低：${DIM_NAMES[low1[0]]} · ${band(low1[1])}`;
 
   // 三个优势：结论 / 为什么有用 / 怎么使用。
   const strengthCards=document.getElementById('strengthCards');
@@ -451,20 +472,22 @@
 
   function renderRadar(){
     const svg=document.getElementById('radar'), keys=['E','A','S','W','C','R','L'], cx=160,cy=160,radius=106,n=keys.length;let html='';
+    const accent=getComputedStyle(document.body).getPropertyValue('--theme-accent').trim()||'#70838f';
+    const soft=getComputedStyle(document.body).getPropertyValue('--theme-soft').trim()||'#dce4e8';
     for(let level=1;level<=4;level++){
       const points=keys.map((_,i)=>{const a=-Math.PI/2+i*2*Math.PI/n,r=radius*level/4;return `${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`;}).join(' ');
-      html+=`<polygon points="${points}" fill="none" stroke="#e9e5dd"/>`;
+      html+=`<polygon points="${points}" fill="none" stroke="#dfe4e5"/>`;
     }
     keys.forEach((key,i)=>{
       const a=-Math.PI/2+i*2*Math.PI/n,x=cx+Math.cos(a)*radius,y=cy+Math.sin(a)*radius;
-      html+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#efede8"/>`;
-      html+=`<text x="${cx+Math.cos(a)*(radius+27)}" y="${cy+Math.sin(a)*(radius+27)+4}" fill="#6f6a63" font-size="10.5" text-anchor="middle">${DIM_NAMES[key]}</text>`;
+      html+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#e7ebec"/>`;
+      html+=`<text x="${cx+Math.cos(a)*(radius+27)}" y="${cy+Math.sin(a)*(radius+27)+4}" fill="#626a6e" font-size="11" font-weight="600" text-anchor="middle">${DIM_NAMES[key]}</text>`;
     });
     const pts=keys.map((key,i)=>{const a=-Math.PI/2+i*2*Math.PI/n,r=radius*d[key]/100;return `${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`;}).join(' ');
-    html+=`<polygon points="${pts}" fill="rgba(139,107,63,.11)" stroke="#7f6240" stroke-width="2"/>`;
+    html+=`<polygon points="${pts}" fill="${soft}" fill-opacity=".58" stroke="${accent}" stroke-width="2.2"/>`;
     keys.forEach((key,i)=>{
       const a=-Math.PI/2+i*2*Math.PI/n,r=radius*d[key]/100,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;
-      html+=`<circle cx="${x}" cy="${y}" r="3.2" fill="#7f6240"/>`;
+      html+=`<circle cx="${x}" cy="${y}" r="3.4" fill="${accent}"/>`;
     });
     svg.innerHTML=html;
   }
