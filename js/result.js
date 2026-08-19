@@ -113,36 +113,83 @@
   let answers = {};
   try { answers = JSON.parse(localStorage.getItem('competition_quiz_answers') || '{}'); } catch (_) {}
 
-  // 正式测试版：结果只能来自真实完成的48道回答，绝不再自动生成演示答案。
+  const CURRENT_SCHEMA = 'v16-48';
+
   function isValidAnswer(q, value) {
     if (q.type === 'binary') return value === 'A' || value === 'B';
     const n = Number(value);
     return Number.isInteger(n) && n >= 1 && n <= 5;
   }
-  const answeredCount = Q.filter(q => Object.prototype.hasOwnProperty.call(answers, q.id) && isValidAnswer(q, answers[q.id])).length;
-  const schemaOK = localStorage.getItem('competition_quiz_schema') === 'v16-48';
-  const completedOK = localStorage.getItem('competition_quiz_completed') === '1';
-  const hasCompleteAnswers = schemaOK && completedOK && answeredCount === Q.length;
 
-  if (!hasCompleteAnswers) {
+  const storedSchema = localStorage.getItem('competition_quiz_schema');
+  const schemaMismatch = Boolean(storedSchema && storedSchema !== CURRENT_SCHEMA);
+
+  // 没有 schema 标记不等于答案作废：只要答案本身符合当前48题结构，就继续使用。
+  if (!storedSchema) localStorage.setItem('competition_quiz_schema', CURRENT_SCHEMA);
+
+  // 单题缓存异常时，只把那一道当作“未完成”，绝不清空其他答案。
+  Object.keys(answers).forEach(key => {
+    const q = Q.find(item => String(item.id) === String(key));
+    if (!q || !isValidAnswer(q, answers[key])) delete answers[key];
+  });
+  localStorage.setItem('competition_quiz_answers', JSON.stringify(answers));
+
+  const answeredCount = Q.filter(q =>
+    Object.prototype.hasOwnProperty.call(answers, q.id) && isValidAnswer(q, answers[q.id])
+  ).length;
+  const firstMissingIndex = Q.findIndex(q =>
+    !Object.prototype.hasOwnProperty.call(answers, q.id) || !isValidAnswer(q, answers[q.id])
+  );
+  const hasCompleteAnswers = !schemaMismatch && answeredCount === Q.length;
+
+  if (schemaMismatch) {
     const main = document.querySelector('main');
     const shareBtn = document.getElementById('shareBtn');
     if (shareBtn) shareBtn.style.display = 'none';
     if (main) {
       main.innerHTML = `
         <section class="report-card incomplete-result-card on">
-          <div class="section-kicker">RESULT NOT READY</div>
-          <h1>还不能生成结果</h1>
-          <p>当前浏览器里只有 <strong>${answeredCount}</strong> / ${Q.length} 道有效回答。为了避免生成假的人格结果，请先完成全部题目。</p>
+          <div class="section-kicker">TEST UPDATED</div>
+          <h1>测试题目已经更新</h1>
+          <p>这次更新涉及题目或计分结构，旧版本答案不能直接套用到新结果里。</p>
           <div class="incomplete-result-actions">
-            <a class="btn btn-primary" href="quiz.html">继续完成测试</a>
+            <a class="btn btn-primary" href="quiz.html">开始新版测试</a>
             <a class="btn btn-secondary" href="index.html">返回首页</a>
           </div>
-          <p class="report-note">如果你刚刚更新过测试版本，旧版答题记录可能已失效，需要重新开始一次48题测试。</p>
         </section>`;
     }
     return;
   }
+
+  if (!hasCompleteAnswers) {
+    // 保留所有已经完成的答案，并把答题页定位到第一道未完成题。
+    localStorage.removeItem('competition_quiz_completed');
+    if (firstMissingIndex >= 0) {
+      localStorage.setItem('competition_quiz_index', String(firstMissingIndex));
+    }
+
+    const main = document.querySelector('main');
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) shareBtn.style.display = 'none';
+    if (main) {
+      main.innerHTML = `
+        <section class="report-card incomplete-result-card on">
+          <div class="section-kicker">还差一点</div>
+          <h1>测试还没有完成</h1>
+          <p>你已经完成 <strong>${answeredCount}</strong> / ${Q.length} 题。之前的答案都已经保留，继续答完剩下的题就可以查看结果。</p>
+          <div class="incomplete-result-actions">
+            <a class="btn btn-primary" href="quiz.html">继续测试</a>
+            <a class="btn btn-secondary" href="index.html">先返回首页</a>
+          </div>
+          <p class="report-note">不会清空进度，也不需要从第一题重新开始。</p>
+        </section>`;
+    }
+    return;
+  }
+
+  // 48题齐全即可认定完成；即使 completed 标记因浏览器异常丢失，也不让用户重做。
+  localStorage.setItem('competition_quiz_completed', '1');
+  localStorage.setItem('competition_quiz_schema', CURRENT_SCHEMA);
 
   function round(v){ return Math.max(0, Math.min(100, Math.round(v))); }
   function dimScore(dim){

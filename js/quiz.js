@@ -4,26 +4,69 @@
   const QUIZ_SCHEMA_VERSION = 'v16-48';
 
   // 题目不展示测量维度，减少受试者按“想得到的类型”作答。
-  if (localStorage.getItem('competition_quiz_schema') !== QUIZ_SCHEMA_VERSION) {
-    localStorage.removeItem('competition_quiz_index');
-    localStorage.removeItem('competition_quiz_answers');
-    localStorage.removeItem('competition_quiz_completed');
-    localStorage.setItem('competition_quiz_schema', QUIZ_SCHEMA_VERSION);
-  }
-
-  // 公开测试版：无需兑换码，任何人都可以直接开始。
-  // 如果上一份测试已经完成，再次进入时自动开启一份新测试；
-  // 未完成的测试则继续保留进度。
-  if (localStorage.getItem('competition_quiz_completed') === '1') {
+  // 只有题库结构真的变化时才清理旧版本答案；UI/文案升级不改 schema。
+  const storedSchema = localStorage.getItem('competition_quiz_schema');
+  if (storedSchema && storedSchema !== QUIZ_SCHEMA_VERSION) {
     localStorage.removeItem('competition_quiz_index');
     localStorage.removeItem('competition_quiz_answers');
     localStorage.removeItem('competition_quiz_completed');
   }
+  localStorage.setItem('competition_quiz_schema', QUIZ_SCHEMA_VERSION);
 
-  let index = Number(localStorage.getItem('competition_quiz_index') || 0);
   let answers = {};
   try { answers = JSON.parse(localStorage.getItem('competition_quiz_answers') || '{}'); } catch (_) {}
+
+  function isAnswerAllowed(q, value) {
+    if (q.type === 'binary') return value === 'A' || value === 'B';
+    const n = Number(value);
+    return Number.isInteger(n) && n >= 1 && n <= 5;
+  }
+
+  // 浏览器缓存若出现异常，只丢掉那一题，不清空整份答卷。
+  Object.keys(answers).forEach(key => {
+    const q = questions.find(item => String(item.id) === String(key));
+    if (!q || !isAnswerAllowed(q, answers[key])) delete answers[key];
+  });
+
+  const completedCount = questions.filter(q =>
+    Object.prototype.hasOwnProperty.call(answers, q.id) && isAnswerAllowed(q, answers[q.id])
+  ).length;
+  const actuallyComplete = completedCount === questions.length;
+
+  // 只有上一份测试真的完整完成后，再次主动进入答题页才开启新测试。
+  // 如果只是少题/中断，则保留全部已有答案并从第一道未答题继续。
+  if (localStorage.getItem('competition_quiz_completed') === '1' && actuallyComplete) {
+    answers = {};
+    localStorage.removeItem('competition_quiz_index');
+    localStorage.removeItem('competition_quiz_answers');
+    localStorage.removeItem('competition_quiz_completed');
+  } else if (!actuallyComplete) {
+    localStorage.removeItem('competition_quiz_completed');
+  }
+
+  function firstUnansweredIndex() {
+    const missing = questions.findIndex(q =>
+      !Object.prototype.hasOwnProperty.call(answers, q.id) || !isAnswerAllowed(q, answers[q.id])
+    );
+    return missing === -1 ? 0 : missing;
+  }
+
+  let savedIndex = Number(localStorage.getItem('competition_quiz_index'));
+  let index;
+  if (!Number.isInteger(savedIndex) || savedIndex < 0 || savedIndex >= questions.length) {
+    index = firstUnansweredIndex();
+  } else {
+    const currentQ = questions[savedIndex];
+    // 如果保存位置已经答过，而后面还有漏题，优先跳到第一道漏题。
+    const missingIndex = firstUnansweredIndex();
+    index = (!actuallyComplete && missingIndex < savedIndex) ? missingIndex : savedIndex;
+    if (!actuallyComplete && answers[currentQ.id] !== undefined && missingIndex !== -1) {
+      index = missingIndex;
+    }
+  }
   index = Math.max(0, Math.min(index, questions.length - 1));
+  localStorage.setItem('competition_quiz_answers', JSON.stringify(answers));
+  localStorage.setItem('competition_quiz_index', String(index));
 
   const box = document.getElementById('questionBox');
   const meta = document.getElementById('questionMeta');
