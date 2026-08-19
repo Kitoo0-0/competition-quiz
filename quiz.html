@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>正在测试｜竞势</title>
-  <link rel="stylesheet" href="styles.css?v=16">
+  <link rel="stylesheet" href="styles.css?v=20">
 </head>
 <body>
   <header class="quiz-header">
@@ -22,12 +22,28 @@
       <div id="answers" class="answers"></div>
       <div class="quiz-nav">
         <button id="prevBtn">← 上一题</button>
-        <button id="saveBtn">保存并退出</button>
+        <div class="quiz-nav-actions">
+          <button id="restartBtn" class="quiz-restart-btn">重新开始</button>
+          <button id="saveBtn">保存并退出</button>
+        </div>
       </div>
     </div>
   </main>
 
+  <div id="restartDialog" class="confirm-dialog" aria-hidden="true">
+    <div class="confirm-dialog-backdrop" data-close-restart></div>
+    <section class="confirm-dialog-card" role="dialog" aria-modal="true" aria-labelledby="restartDialogTitle">
+      <div class="confirm-dialog-kicker">重新开始测试</div>
+      <h2 id="restartDialogTitle">确定清空当前进度吗？</h2>
+      <p id="restartDialogCopy">重新开始后，当前已经完成的答案会被清空，而且无法恢复。</p>
+      <div class="confirm-dialog-actions">
+        <button id="cancelRestartBtn" class="btn btn-secondary">继续当前测试</button>
+        <button id="confirmRestartBtn" class="btn btn-primary danger-action">确认重新开始</button>
+      </div>
+    </section>
+  </div>
+
   <script src="js/questions.js?v=16"></script>
-  <script src="js/quiz.js?v=19"></script>
+  <script src="js/quiz.js?v=20"></script>
 </body>
 </html>

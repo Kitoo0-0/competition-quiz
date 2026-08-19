@@ -76,6 +76,11 @@
   const count = document.getElementById('progressCount');
   const prevBtn = document.getElementById('prevBtn');
   const saveBtn = document.getElementById('saveBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const restartDialog = document.getElementById('restartDialog');
+  const restartDialogCopy = document.getElementById('restartDialogCopy');
+  const cancelRestartBtn = document.getElementById('cancelRestartBtn');
+  const confirmRestartBtn = document.getElementById('confirmRestartBtn');
 
   function persist() {
     localStorage.setItem('competition_quiz_index', String(index));
@@ -147,6 +152,46 @@
   saveBtn.addEventListener('click', () => {
     persist();
     location.href = 'index.html';
+  });
+
+  function openRestartDialog() {
+    const done = questions.filter(q =>
+      Object.prototype.hasOwnProperty.call(answers, q.id) && isAnswerAllowed(q, answers[q.id])
+    ).length;
+    if (restartDialogCopy) {
+      restartDialogCopy.textContent = done
+        ? `你已经完成 ${done} / ${questions.length} 题。重新开始会清空这些答案，而且无法恢复。`
+        : '重新开始会回到第 1 题。当前没有已完成答案。';
+    }
+    restartDialog?.classList.add('show');
+    restartDialog?.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('dialog-open');
+    cancelRestartBtn?.focus();
+  }
+
+  function closeRestartDialog() {
+    restartDialog?.classList.remove('show');
+    restartDialog?.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('dialog-open');
+  }
+
+  restartBtn?.addEventListener('click', openRestartDialog);
+  cancelRestartBtn?.addEventListener('click', closeRestartDialog);
+  restartDialog?.querySelectorAll('[data-close-restart]').forEach(el => el.addEventListener('click', closeRestartDialog));
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && restartDialog?.classList.contains('show')) closeRestartDialog();
+  });
+
+  confirmRestartBtn?.addEventListener('click', () => {
+    answers = {};
+    index = 0;
+    localStorage.removeItem('competition_quiz_answers');
+    localStorage.removeItem('competition_quiz_completed');
+    localStorage.setItem('competition_quiz_index', '0');
+    localStorage.setItem('competition_quiz_schema', QUIZ_SCHEMA_VERSION);
+    closeRestartDialog();
+    render();
+    window.scrollTo({top: 0, behavior: 'smooth'});
   });
 
   render();

@@ -247,6 +247,7 @@
   const secondCandidates=Object.keys(PERSONALITIES).filter(x=>x!==primary && x!=='D01');
   const secondary=secondCandidates.sort((a,b)=>(scores[b]||0)-(scores[a]||0))[0];
   const p=PERSONALITIES[primary], s=PERSONALITIES[secondary];
+  document.body.classList.add(`result-theme-${primary.charAt(0).toLowerCase()}`);
   const top=Object.entries(d).sort((a,b)=>b[1]-a[1]);
   const bottom=[...top].reverse();
 
@@ -385,7 +386,7 @@
   ['E','A','S','W','C','R','L'].forEach(key=>{
     const value=d[key], info=DIMENSIONS[key];
     const row=document.createElement('article');
-    row.className='dimension-visual-row';
+    row.className=`dimension-visual-row dim-${key.toLowerCase()}`;
     const result=value>=70?`这项是你的${value>=85?'明显':'稳定'}优势。`:value<45?'这项目前更容易成为卡点。':'这项处在中间区，会随场景变化。';
     row.innerHTML=`
       <div class="dimension-visual-head">
@@ -403,7 +404,7 @@
   const strengthCards=document.getElementById('strengthCards');
   [top1,top2,top3].forEach(([key,value],i)=>{
     const card=document.createElement('article');
-    card.className='insight-card';
+    card.className=`insight-card dim-${key.toLowerCase()}`;
     card.innerHTML=`
       <div class="insight-number">0${i+1}</div>
       <div class="insight-title-row"><h3>${DIM_NAMES[key]}</h3><span class="insight-level">${band(value)}</span></div>
@@ -415,11 +416,11 @@
   // 三个相对较弱的底层能力，避免再用竞争方式重复解释同一件事。
   const watchCards=document.getElementById('watchCards');
   const watchItems=[low1,low2,low3].map(([key,score])=>({
-    name:DIM_NAMES[key], score, text:DIM_RISK[key], fix:DIM_FIX[key]
+    key, name:DIM_NAMES[key], score, text:DIM_RISK[key], fix:DIM_FIX[key]
   }));
   watchItems.forEach((item,i)=>{
     const card=document.createElement('article');
-    card.className='insight-card watch-card';
+    card.className=`insight-card watch-card dim-${item.key.toLowerCase()}`;
     card.innerHTML=`
       <div class="insight-number">0${i+1}</div>
       <div class="insight-title-row"><h3>${item.name}</h3><span class="insight-level">${band(item.score)}</span></div>
@@ -438,9 +439,9 @@
   // 90天：不再写长计划，只给三个可执行动作。
   const actionTimeline=document.getElementById('actionTimeline');
   const actionItems=[
-    {time:'0—30 天',title:`把 ${DIM_NAMES[top1[0]]} 用出结果`,text:DIM_FIX[top1[0]]},
-    {time:'31—60 天',title:`补住 ${DIM_NAMES[low1[0]]} 的缺口`,text:DIM_FIX[low1[0]]},
-    {time:'61—90 天',title:'做一次现实验证',text:firstSentences(c.move,2)}
+    {time:'先做',title:`放大：${DIM_NAMES[top1[0]]}`,text:DIM_FIX[top1[0]]},
+    {time:'再补',title:`补强：${DIM_NAMES[low1[0]]}`,text:DIM_FIX[low1[0]]},
+    {time:'最后',title:'现实验证',text:firstSentences(c.move,2)}
   ];
   actionTimeline.innerHTML=actionItems.map((x,i)=>`
     <article class="action-step">
