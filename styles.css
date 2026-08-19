@@ -1589,88 +1589,89 @@ body.result-theme-d { --theme-soft:#e3e0e8; --theme-accent:#817b91; }
 
 
 /* =========================================================
-   v21 — one Morandi color per result + complete share card
+   v22 — v20 rollback + surgical fixes only
+   Neutral report cards; one personality accent only in hero/share.
    ========================================================= */
-body.result-page-v17 {
-  background:
-    radial-gradient(760px 520px at 12% 4%, color-mix(in srgb, var(--theme-soft, #dce4e8) 58%, transparent), transparent 72%),
-    #f4f6f6 !important;
-}
 
-/* One result = one hue. Different personalities receive different
-   --theme-soft / --theme-accent values from result.js. */
-.result-page-v17 .v17-glass,
-.result-page-v17 .v17-share-card {
-  background: color-mix(in srgb, var(--theme-soft, #dce4e8) 28%, white) !important;
-  border-color: color-mix(in srgb, var(--theme-accent, #70838f) 13%, white) !important;
-}
+/* One result gets one low-saturation accent, without tinting every card. */
 .result-page-v17 .result-overview {
   background:
-    radial-gradient(520px 320px at 92% 4%, color-mix(in srgb, var(--theme-soft, #dce4e8) 88%, transparent), transparent 70%),
-    color-mix(in srgb, var(--theme-soft, #dce4e8) 22%, white) !important;
+    radial-gradient(520px 330px at 91% 3%, color-mix(in srgb, var(--theme-soft, #dce4e8) 82%, transparent), transparent 70%),
+    rgba(250,251,251,.86) !important;
 }
-.result-page-v17 .axis-panel,
-.result-page-v17 .radar-panel,
+.result-page-v17 .axis-panel {
+  background: color-mix(in srgb, var(--theme-soft, #dce4e8) 34%, white) !important;
+  border-color: color-mix(in srgb, var(--theme-accent, #70838f) 16%, transparent) !important;
+}
+.result-page-v17 .badge,
+.result-page-v17 .axis-label strong,
+.result-page-v17 .eyebrow {
+  color: var(--theme-accent, #70838f) !important;
+}
+.result-page-v17 .axis-track i {
+  background: var(--theme-accent, #70838f) !important;
+}
+
+/* Main report stays neutral: no rainbow/multi-Morandi card system. */
 .result-page-v17 .insight-card,
 .result-page-v17 .watch-card,
 .result-page-v17 .dimension-visual-row,
 .result-page-v17 .v17-advice-card,
 .result-page-v17 .action-step,
 .result-page-v17 .role-chips > * {
-  --card-bg: var(--theme-soft, #dce4e8) !important;
-  --card-accent: var(--theme-accent, #70838f) !important;
-  background: color-mix(in srgb, var(--theme-soft, #dce4e8) 54%, white) !important;
-  border-color: color-mix(in srgb, var(--theme-accent, #70838f) 16%, transparent) !important;
+  --card-bg:#edf1f2 !important;
+  --card-accent:var(--theme-accent, #70838f) !important;
+  background:rgba(247,249,249,.88) !important;
+  border-color:rgba(73,84,89,.09) !important;
 }
-.result-page-v17 .watch-card,
-.result-page-v17 .action-step:nth-child(2) {
-  background: color-mix(in srgb, var(--theme-soft, #dce4e8) 38%, white) !important;
+.result-page-v17 .watch-card { background:rgba(244,246,246,.92) !important; }
+.result-page-v17 .insight-number,
+.result-page-v17 .insight-action span,
+.result-page-v17 .dimension-band,
+.result-page-v17 .insight-level {
+  color:var(--theme-accent, #70838f) !important;
 }
-.result-page-v17 .action-step:nth-child(3) {
-  background: color-mix(in srgb, var(--theme-soft, #dce4e8) 46%, white) !important;
+.result-page-v17 .dimension-band,
+.result-page-v17 .insight-level {
+  background:color-mix(in srgb, var(--theme-soft, #dce4e8) 45%, white) !important;
+  border-color:color-mix(in srgb, var(--theme-accent, #70838f) 15%, transparent) !important;
 }
+.result-page-v17 .visual-meter i { background:var(--theme-accent, #70838f) !important; }
+
+/* Advice and next-step cards: neutral containers, same accent language. */
 .result-page-v17 .advice-result,
 .result-page-v17 .advice-love,
-.result-page-v17 .advice-env {
-  background: color-mix(in srgb, var(--theme-soft, #dce4e8) 58%, white) !important;
-  border-color: color-mix(in srgb, var(--theme-accent, #70838f) 16%, transparent) !important;
+.result-page-v17 .advice-env,
+.result-page-v17 .action-step:nth-child(1),
+.result-page-v17 .action-step:nth-child(2),
+.result-page-v17 .action-step:nth-child(3) {
+  background:rgba(247,249,249,.90) !important;
+  border-color:rgba(73,84,89,.09) !important;
 }
 .result-page-v17 .advice-result .v17-advice-label span,
 .result-page-v17 .advice-love .v17-advice-label span,
 .result-page-v17 .advice-env .v17-advice-label span {
-  background: color-mix(in srgb, var(--theme-soft, #dce4e8) 84%, white) !important;
-  color: var(--theme-accent, #70838f) !important;
-}
-.result-page-v17 .insight-number,
-.result-page-v17 .insight-action span,
-.result-page-v17 .dimension-score,
-.result-page-v17 .dimension-band,
-.result-page-v17 .insight-level {
-  color: var(--theme-accent, #70838f) !important;
-}
-.result-page-v17 .visual-meter i,
-.result-page-v17 .axis-track i,
-.result-page-v17 .share-mini-track i {
-  background: var(--theme-accent, #70838f) !important;
+  background:color-mix(in srgb, var(--theme-soft, #dce4e8) 54%, white) !important;
+  color:var(--theme-accent, #70838f) !important;
 }
 
-/* Ability legend: explain every displayed level. */
+/* Explain every band without changing v20 thresholds. */
 .result-page-v17 .ability-legend {
   display:flex;
   flex-wrap:wrap;
   justify-content:flex-end;
-  gap:8px;
-  max-width:480px;
+  gap:7px;
+  max-width:520px;
 }
 .result-page-v17 .ability-legend span {
   display:inline-flex;
   align-items:center;
-  gap:6px;
-  padding:8px 10px;
+  gap:5px;
+  padding:7px 9px;
   border-radius:999px;
-  background:color-mix(in srgb, var(--theme-soft, #dce4e8) 46%, white);
-  border:1px solid color-mix(in srgb, var(--theme-accent, #70838f) 14%, transparent);
-  color:#5e666a;
+  background:#eef1f1;
+  border:1px solid rgba(73,84,89,.08);
+  color:#697175;
   font-weight:560;
   line-height:1.35;
 }
@@ -1679,10 +1680,8 @@ body.result-page-v17 {
   font-weight:760;
 }
 
-/* Complete share card: content determines height instead of a fixed 4:5 box. */
-.result-page-v17 .v17-share-card {
-  overflow:visible !important;
-}
+/* Complete share card: no fixed 4:5 crop. Keep the personality's single accent. */
+.result-page-v17 .v17-share-card { overflow:visible !important; }
 .result-page-v17 .v17-share-card .share-preview {
   width:min(460px,100%);
   aspect-ratio:auto !important;
@@ -1690,19 +1689,17 @@ body.result-page-v17 {
   height:auto !important;
   overflow:visible !important;
   background:
-    radial-gradient(430px 300px at 12% 8%, color-mix(in srgb, var(--theme-soft, #dce4e8) 82%, transparent), transparent 70%),
-    color-mix(in srgb, var(--theme-soft, #dce4e8) 42%, white) !important;
+    radial-gradient(430px 300px at 12% 8%, color-mix(in srgb, var(--theme-soft, #dce4e8) 76%, transparent), transparent 70%),
+    color-mix(in srgb, var(--theme-soft, #dce4e8) 36%, white) !important;
   border-color:color-mix(in srgb, var(--theme-accent, #70838f) 18%, transparent) !important;
 }
 .result-page-v17 .v17-share-card .share-inner-frame {
   height:auto !important;
   min-height:0 !important;
-  background:rgba(255,255,255,.72) !important;
+  background:rgba(255,255,255,.76) !important;
   border-color:color-mix(in srgb, var(--theme-accent, #70838f) 18%, transparent) !important;
 }
-.result-page-v17 .share-score-panel {
-  margin-top:24px !important;
-}
+.result-page-v17 .share-score-panel { margin-top:24px !important; }
 .result-page-v17 .share-card-top,
 .result-page-v17 .share-score-panel,
 .result-page-v17 .share-footer {
@@ -1710,39 +1707,14 @@ body.result-page-v17 {
 }
 .result-page-v17 .share-track,
 .result-page-v17 .share-strengths span,
-.result-page-v17 .share-brand span {
+.result-page-v17 .share-brand span,
+.result-page-v17 .share-overline {
   color:var(--theme-accent, #70838f) !important;
-  border-color:color-mix(in srgb, var(--theme-accent, #70838f) 25%, transparent) !important;
+  border-color:color-mix(in srgb, var(--theme-accent, #70838f) 24%, transparent) !important;
 }
+.result-page-v17 .share-mini-track i { background:var(--theme-accent, #70838f) !important; }
 
 @media (max-width:900px){
   .result-page-v17 .section-heading-row{align-items:flex-start;gap:16px;flex-direction:column;}
   .result-page-v17 .ability-legend{justify-content:flex-start;max-width:none;}
-}
-
-/* v21 polish: remove legacy beige/pink accents so a result uses one hue only. */
-.result-page-v17 .result-overview::before,
-.result-page-v17 .result-overview::after,
-.result-page-v17 .v17-advice-section::before {
-  background: radial-gradient(circle,
-    color-mix(in srgb, var(--theme-soft, #dce4e8) 88%, transparent),
-    transparent 70%) !important;
-}
-.result-page-v17 .eyebrow,
-.result-page-v17 .section-kicker,
-.result-page-v17 .v17-advice-label,
-.result-page-v17 .share-overline,
-.result-page-v17 .insight-number,
-.result-page-v17 .insight-action span {
-  color: var(--theme-accent, #70838f) !important;
-}
-.result-page-v17 .v17-next-card {
-  background:
-    radial-gradient(430px 270px at 90% 15%, color-mix(in srgb, var(--theme-soft, #dce4e8) 70%, transparent), transparent 70%),
-    color-mix(in srgb, var(--theme-soft, #dce4e8) 24%, white) !important;
-}
-.result-page-v17 .share-preview::before {
-  background:
-    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--theme-soft, #dce4e8) 82%, transparent), transparent 28%),
-    linear-gradient(145deg, rgba(255,255,255,.68), rgba(255,255,255,0) 46%) !important;
 }
